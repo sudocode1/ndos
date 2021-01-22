@@ -4,7 +4,7 @@ const prompt = require("prompt-sync")();
 const os = require("os");
 
 // data
-let version = "alpha-0.1";
+let version = "alpha-0.2";
 let blueprint = true;
 
 // functions
@@ -40,10 +40,20 @@ boot();
 // script
 function nd() {
     let cmd = prompt(`ndos>`);
+
     let spl = cmd.split(" ");
 
     if (cmd.startsWith(`help`)) {
+        let cmds = [
+            ["help", "list commands"], 
+            ["dir", "list folders in directory specified"], 
+            ["exit", "exit nodedos"], 
+            ["clear", "clear the console"], 
+            ["write", "write text to a file"],
+            ["read", "read a file"]
+        ];
         console.log(`Commands in NDOS ${version}`);
+        cmds.map(x => console.log(`${x[0]}: ${x[1]}`));
     };
 
     if (cmd.startsWith(`dir`)) {
