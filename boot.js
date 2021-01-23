@@ -4,7 +4,7 @@ const prompt = require("prompt-sync")();
 const os = require("os");
 
 // data
-let version = "alpha-0.4";
+let version = "alpha-0.5";
 let blueprint = true;
 
 // functions
@@ -51,7 +51,9 @@ function nd() {
             ["clear", "clear the console"], 
             ["write", "write text to a file"],
             ["read", "read a file"],
-            ["execute", "execute a JavaScript file"]
+            ["execute", "execute a JavaScript file"],
+            ["newdrive", "create new drive"],
+            ["mount", "mount a drive"]
         ];
         console.log(`Commands in NDOS ${version}`);
         cmds.map(x => console.log(`${x[0]}: ${x[1]}`));
@@ -141,6 +143,37 @@ function nd() {
                 
             }
             else null;
+
+        }
+    }
+
+    else if (cmd.startsWith(`unmount`)) {
+        if (!spl[1]) console.log(`Argument unsatisfied.`)
+        else {
+            let cont;
+            let str = "";
+
+            try {fs.readdirSync(`./drives/${spl[1]}`); cont = true;} catch(e) {cont = false;};
+
+            if (cont == true) {
+                fs.writeFileSync(`./drives/${spl[1]}/compress.txt`, "");
+                fs.readdirSync(`./drives/${spl[1]}`).map(x => {
+                    if (x == `compress.txt`) return;
+                    let result;
+
+                    try {fs.readFileSync(`./drives/${spl[1]}/${x}`, `utf-8`); result = "f";}
+                    catch(e) {console.log(`${x} is a directory.\nDirectories are not currently supported.`); result = "d"}
+                    finally {if (result === "f") {
+                        str += `file,${x},` + fs.readFileSync(`./drives/${spl[1]}/${x}`, `utf-8`) + `|`;
+                        fs.rmSync(`./drives/${spl[1]}/${x}`);
+                    }};
+
+                });
+
+                fs.writeFileSync(`./drives/${spl[1]}/compress.txt`, str);
+            }
+            else null;
+
 
         }
     }
