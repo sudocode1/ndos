@@ -4,7 +4,7 @@ const prompt = require("prompt-sync")();
 const os = require("os");
 
 // data
-let version = "alpha-0.2";
+let version = "alpha-0.3";
 let blueprint = true;
 
 // functions
@@ -50,7 +50,8 @@ function nd() {
             ["exit", "exit nodedos"], 
             ["clear", "clear the console"], 
             ["write", "write text to a file"],
-            ["read", "read a file"]
+            ["read", "read a file"],
+            ["execute", "execute a JavaScript file"]
         ];
         console.log(`Commands in NDOS ${version}`);
         cmds.map(x => console.log(`${x[0]}: ${x[1]}`));
@@ -85,7 +86,28 @@ function nd() {
         }
     };
 
-    if (cmd.startsWith(`read`)) {}
+    if (cmd.startsWith(`read`)) {
+        let file;
+        
+        if(!spl[1]) file = prompt(`File to read? `);
+        else file = spl[1];
+
+        try {console.log(fs.readFileSync(file, `utf-8`))} catch (e) {console.log(`This file failed to read.`)};
+    }
+
+    if (cmd.startsWith(`execute`)) {
+        let toExc;
+        let cont = false;
+
+        if(!spl[1]) toExc = prompt(`File to execute? `);
+        else toExc = spl[1];
+
+        try { fs.readFileSync(toExc); cont = true; } catch (e) { console.log("The file failed to read."); cont = false; };
+
+        if (cont === true) {
+            try {eval(fs.readFileSync(toExc, `utf-8`))} catch(e) {console.log(e)};
+        }
+    }
 
     console.log();
     nd();
