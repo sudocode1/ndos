@@ -4,7 +4,7 @@ const prompt = require("prompt-sync")();
 const os = require("os");
 
 // data
-let version = "alpha-0.3";
+let version = "alpha-0.4";
 let blueprint = true;
 
 // functions
@@ -55,18 +55,18 @@ function nd() {
         ];
         console.log(`Commands in NDOS ${version}`);
         cmds.map(x => console.log(`${x[0]}: ${x[1]}`));
-    };
+    }
 
-    if (cmd.startsWith(`dir`)) {
+    else if (cmd.startsWith(`dir`)) {
         try {!spl[1] ? console.log(fs.readdirSync(`./`).join("\n")) : (console.log(fs.readdirSync(spl[1]).join(`\n`)));}
         catch (e) {console.log(`There was an error accessing this directory.`)};
     }
 
-    if (cmd.startsWith(`exit`)) process.exit();
+    else if (cmd.startsWith(`exit`)) process.exit()
 
-    if (cmd.startsWith(`clear`)) {clear()};
+    else if (cmd.startsWith(`clear`)) {clear()}
 
-    if (cmd.startsWith(`write`)) {
+    else if (cmd.startsWith(`write`)) {
         let file = prompt("File? ");
         let data = prompt("Text: ");
 
@@ -84,9 +84,9 @@ function nd() {
             fs.writeFileSync(file, data);
             console.log(`Written to ${file}!`);
         }
-    };
+    }
 
-    if (cmd.startsWith(`read`)) {
+    else if (cmd.startsWith(`read`)) {
         let file;
         
         if(!spl[1]) file = prompt(`File to read? `);
@@ -95,7 +95,7 @@ function nd() {
         try {console.log(fs.readFileSync(file, `utf-8`))} catch (e) {console.log(`This file failed to read.`)};
     }
 
-    if (cmd.startsWith(`execute`)) {
+    else if (cmd.startsWith(`execute`)) {
         let toExc;
         let cont = false;
 
@@ -107,6 +107,47 @@ function nd() {
         if (cont === true) {
             try {eval(fs.readFileSync(toExc, `utf-8`))} catch(e) {console.log(e)};
         }
+    }
+
+    else if (cmd.startsWith(`newdrive`)) {
+        if (!spl[1]) console.log(`Argument unsatisfied.`)
+
+        else {
+            fs.mkdirSync(`./drives/${spl[1]}`);
+            fs.writeFileSync(`./drives/${spl[1]}/compress.txt`, `file,hello.txt,hiehjhejahsdaFSHG|file,hi.js,console.log("hello")`);
+        };
+    }
+
+    else if (cmd.startsWith(`mount`)) {
+        if (!spl[1]) console.log(`Argument unsatisfied.`)
+        else {
+            let cont;
+
+            try {fs.readFileSync(`./drives/${spl[1]}/compress.txt`, `utf-8`); cont = true;} catch(e) {console.log("There was an error reading the compression."); cont = false;};
+            
+            if (cont == true) {
+                let file = fs.readFileSync(`./drives/${spl[1]}/compress.txt`, `utf-8`).toString();
+                let f = file.split("|");
+
+                function check(toCheck, drive) {
+                    let split = toCheck.split(`,`);
+
+                    if(split[0] == `file`) {
+                        fs.writeFileSync(`./drives/${drive}/${split[1]}`, split[2]);
+                    }
+                }
+
+                f.map(x => check(x, spl[1]));
+                
+            }
+            else null;
+
+        }
+    }
+
+    else {
+        try {fs.readdirSync(`./commands`)} catch(e) {console.log(`This command does not exist!`)};
+        fs.readdirSync(`./commands`).includes(`${cmd}.js`) ? eval(fs.readFileSync(`./commands/${cmd}.js`, `utf-8`)) : console.log("This command does not exist!");
     }
 
     console.log();
