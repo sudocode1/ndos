@@ -1,10 +1,11 @@
 // dependencies
 const fs = require("fs");
 const prompt = require("prompt-sync")();
-const os = require("os");
+const fetch = require("node-fetch");
+
 
 // data
-let version = "alpha-0.5";
+let version = "alpha-0.6";
 let blueprint = true;
 
 // functions
@@ -38,7 +39,7 @@ function boot() {
 boot();
 
 // script
-function nd() {
+async function nd() {
     let cmd = prompt(`ndos>`);
 
     let spl = cmd.split(" ");
@@ -46,14 +47,16 @@ function nd() {
     if (cmd.startsWith(`help`)) {
         let cmds = [
             ["help", "list commands"], 
-            ["dir", "list folders in directory specified"], 
+            ["dir [directory]", "list folders in directory specified"], 
             ["exit", "exit nodedos"], 
             ["clear", "clear the console"], 
-            ["write", "write text to a file"],
-            ["read", "read a file"],
-            ["execute", "execute a JavaScript file"],
-            ["newdrive", "create new drive"],
-            ["mount", "mount a drive"]
+            ["write [file]", "write text to a file"],
+            ["read [file]", "read a file"],
+            ["execute [file]", "execute a JavaScript file"],
+            ["newdrive <drive>", "create new drive"],
+            ["mount <drive>", "mount a drive"],
+            ["unmount <drive>", "unmount a drive"],
+            ["jpac <package>", "install a package"]
         ];
         console.log(`Commands in NDOS ${version}`);
         cmds.map(x => console.log(`${x[0]}: ${x[1]}`));
@@ -176,6 +179,13 @@ function nd() {
 
 
         }
+    }
+
+    else if (cmd.startsWith(`jpac`)) {
+        await fetch(`http://ndosrepos.7m.pl/${spl[1]}.js`)
+        .then(res => res.text())
+        .then(body => fs.writeFileSync(`./commands/${spl[1]}.js`, body));
+        
     }
 
     else {
