@@ -5,7 +5,7 @@ const fetch = require("node-fetch");
 
 
 // data
-let version = "alpha-0.6";
+let version = "alpha-0.6.1";
 let blueprint = true;
 
 // functions
@@ -47,7 +47,7 @@ async function nd() {
     if (cmd.startsWith(`help`)) {
         let cmds = [
             ["help", "list commands"], 
-            ["dir [directory]", "list folders in directory specified"], 
+            ["dir [directory]", "list folders in directory specified"],
             ["exit", "exit nodedos"], 
             ["clear", "clear the console"], 
             ["write [file]", "write text to a file"],
@@ -119,7 +119,8 @@ async function nd() {
 
         else {
             fs.mkdirSync(`./drives/${spl[1]}`);
-            fs.writeFileSync(`./drives/${spl[1]}/compress.txt`, `file,hello.txt,hiehjhejahsdaFSHG|file,hi.js,console.log("hello")`);
+            fs.writeFileSync(`./drives/${spl[1]}/compress.txt`, ``);
+            console.log(`${spl[1]} has been created & mounted.`);
         };
     }
 
@@ -138,7 +139,7 @@ async function nd() {
                     let split = toCheck.split(`,`);
 
                     if(split[0] == `file`) {
-                        fs.writeFileSync(`./drives/${drive}/${split[1]}`, split[2]);
+                        fs.writeFileSync(`./drives/${drive}/${split[1]}`, Buffer.from(split[2], "base64").toString());
                     }
                 }
 
@@ -167,7 +168,7 @@ async function nd() {
                     try {fs.readFileSync(`./drives/${spl[1]}/${x}`, `utf-8`); result = "f";}
                     catch(e) {console.log(`${x} is a directory.\nDirectories are not currently supported.`); result = "d"}
                     finally {if (result === "f") {
-                        str += `file,${x},` + fs.readFileSync(`./drives/${spl[1]}/${x}`, `utf-8`) + `|`;
+                        str += `file,${x},` + Buffer.from(fs.readFileSync(`./drives/${spl[1]}/${x}`, `utf-8`).toString()).toString("base64") + `|`;
                         fs.rmSync(`./drives/${spl[1]}/${x}`);
                     }};
 
