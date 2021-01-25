@@ -1,0 +1,33 @@
+{
+    "BOOT": {
+        "DISABLE_BOOT_SCRIPTS": 0,
+        "DISABLE_DEVELOPER_NOTES": 0
+    },
+
+    "COMMANDS": {},
+
+    "HELP_CMD": {
+        "HELP_SHOWN": [1, "help", "list commands"],
+        "DIR_SHOWN": [1, "dir [directory]", "list folders in directory specified"],
+        "EXIT_SHOWN": [1, "exit", "exit nodedos"],
+        "CLEAR_SHOWN": [1, "clear", "clear the console"],
+        "WRITE_SHOWN": [1, "write [file]", "write text to a file"],
+        "READ_SHOWN": [1, "read [file]", "read text from a file"],
+        "EXECUTE_SHOWN": [1, "execute [file]", "execute a JS file"],
+        "NEWDRIVE_SHOWN": [1, "newdrive <drive>", "create a new drive"],
+        "MOUNT_SHOWN": [1, "mount <drive>", "mount a drive"],
+        "UNMOUNT_SHOWN": [1, "unmount <drive>", "unmount a drive"],
+        "JPAC_SHOWN": [1, "jpac <package>", "install an official package"],
+        "PACMAN_SHOWN": [1, "pacman <link> <package>", "install an external package"],
+        "ECHO_SHOWN": [1, "echo <msg>", "return msg"],
+        "EVAL_SHOWN": [1, "eval <js>", "execute javascript"]
+    },
+
+    "DIR_CMD": {
+        "DEFAULT_DIRECTORY": "./"
+    },
+
+    "PACMAN_CMD": {
+        "DEFAULT_ADDRESS": "pain.7m.pl"
+    }
+}

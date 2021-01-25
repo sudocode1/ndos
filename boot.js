@@ -2,10 +2,10 @@
 const fs = require("fs");
 const prompt = require("prompt-sync")();
 const fetch = require("node-fetch");
-
+let reg = require(`./registry.json`);
 
 // data
-let version = "alpha-0.7";
+let version = "alpha-0.8";
 let blueprint = true;
 
 // functions
@@ -23,14 +23,25 @@ function boot() {
     clear();
     
     let bootscripts = false;
+    let devNotes = true;
 
     try {fs.readdirSync(`./boot`); bootscripts = true;} catch(e) {console.log(` No boot folder found!`); bootscripts = false;};
+
+    reg.BOOT["DISABLE_BOOT_SCRIPTS"] !== 0 ? bootscripts = false : null;
+    reg.BOOT["DISABLE_DEVELOPER_NOTES"] !== 0 ? devNotes = false : null;
+
+    if (devNotes == true) {
+        console.log(`directories are currently disabled in mount/unmount (alpha-0.6.1 and above)`);
+        console.log(`developed by sudocode1 and 1s3k3b`);
+        console.log(`Release Alpha-0.8, 1/25/2021`);
+    }
 
     if (bootscripts === true) {
         console.log(`\x1b[33mRunning Boot Scripts`)
         console.log("\x1b[0m");
 
         fs.readdirSync(`./boot`).map(x => eval(fs.readFileSync(`./boot/${x}`, `utf-8`)));
+        console.log();
     }
 
     nd();
@@ -45,28 +56,21 @@ async function nd() {
     let spl = cmd.split(" ");
 
     if (cmd.startsWith(`help`)) {
-        let cmds = [
-            ["help", "list commands"], 
-            ["dir [directory]", "list folders in directory specified"],
-            ["exit", "exit nodedos"], 
-            ["clear", "clear the console"], 
-            ["write [file]", "write text to a file"],
-            ["read [file]", "read a file"],
-            ["execute [file]", "execute a JavaScript file"],
-            ["newdrive <drive>", "create new drive"],
-            ["mount <drive>", "mount a drive"],
-            ["unmount <drive>", "unmount a drive"],
-            ["jpac <package>", "install a package"],
-            ["pacman <link> <package>", "install an external package"],
-            ["echo <msg>", "return msg"],
-            ["eval <javascript>", "execute javascript"]
-        ];
+        let cmds = [];
+        let c = [];
+
+        cmds = Object.entries(reg.HELP_CMD);
+
+        cmds.map(x => {
+            if (x[1][0] == 1) c.push([x[1][1], x[1][2]]); 
+        })
+
         console.log(`Commands in NDOS ${version}`);
-        cmds.map(x => console.log(`${x[0]}: ${x[1]}`));
+        c.map(x => console.log(`${x[0]}: ${x[1]}`));
     }
 
     else if (cmd.startsWith(`dir`)) {
-        try {!spl[1] ? console.log(fs.readdirSync(`./`).join("\n")) : (console.log(fs.readdirSync(spl[1]).join(`\n`)));}
+        try {!spl[1] ? console.log(fs.readdirSync(reg.DIR_CMD["DEFAULT_DIRECTORY"]).join("\n")) : (console.log(fs.readdirSync(spl[1]).join(`\n`)));}
         catch (e) {console.log(`There was an error accessing this directory.`)};
     }
 
@@ -193,7 +197,14 @@ async function nd() {
     }
 
     else if (cmd.startsWith(`pacman`)) {
-        await fetch(`http://${spl[1]}/${spl[2]}.js`)
+        let address = spl[1];
+
+        if (spl[1] == `default`) {
+            address = reg.PACMAN_CMD["DEFAULT_ADDRESS"];
+            console.log(`Using default address: ${reg.PACMAN_CMD["DEFAULT_ADDRESS"]}\nChange in registry options.`);
+        }
+
+        await fetch(`http://${address}/${spl[2]}.js`)
         .then(res => res.text())
         .then(body => fs.writeFileSync(`./commands/${spl[2]}.js`, body))
     }
