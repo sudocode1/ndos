@@ -5,7 +5,7 @@ const fetch = require("node-fetch");
 
 
 // data
-let version = "alpha-0.6.1";
+let version = "alpha-0.7";
 let blueprint = true;
 
 // functions
@@ -56,7 +56,10 @@ async function nd() {
             ["newdrive <drive>", "create new drive"],
             ["mount <drive>", "mount a drive"],
             ["unmount <drive>", "unmount a drive"],
-            ["jpac <package>", "install a package"]
+            ["jpac <package>", "install a package"],
+            ["pacman <link> <package>", "install an external package"],
+            ["echo <msg>", "return msg"],
+            ["eval <javascript>", "execute javascript"]
         ];
         console.log(`Commands in NDOS ${version}`);
         cmds.map(x => console.log(`${x[0]}: ${x[1]}`));
@@ -187,6 +190,20 @@ async function nd() {
         .then(res => res.text())
         .then(body => fs.writeFileSync(`./commands/${spl[1]}.js`, body));
         
+    }
+
+    else if (cmd.startsWith(`pacman`)) {
+        await fetch(`http://${spl[1]}/${spl[2]}.js`)
+        .then(res => res.text())
+        .then(body => fs.writeFileSync(`./commands/${spl[2]}.js`, body))
+    }
+
+    else if (cmd.startsWith(`echo`)) {
+        console.log(spl.slice(1).join(" "));
+    }
+
+    else if (cmd.startsWith(`eval`)) {
+        eval(spl.slice(1).join(" "));
     }
 
     else {
