@@ -148,9 +148,15 @@ async function nd() {
         if (!spl[1]) console.log(`Argument unsatisfied.`)
 
         else {
-            fs.mkdirSync(`./drives/${spl[1]}`);
+            let driveExists = true;
+            try {fs.readFileSync(`./drives/${spl[1]}/compress.txt`); driveExists = true;} catch(e) {driveExists = false;fs.mkdirSync(`./drives/${spl[1]}`);};
+            if (driveExists == true) {
+                let cont = console.log(`The drive ${spl[1]} already exists.`);
+            }
+            else {    
             fs.writeFileSync(`./drives/${spl[1]}/compress.txt`, ``);
             console.log(`${spl[1]} has been created & mounted.`);
+        }
         };
     }
 
@@ -218,8 +224,10 @@ async function nd() {
 
         if (cont == true) {
             try {
+                console.log("Fetching file...")
                 await fetch(`http://ndosrepos.7m.pl/${spl[1]}.js`)
                 .then(res => res.text())
+                .then(console.log("Downloading..."))
                 .then(body => fs.writeFileSync(`./commands/${spl[1]}.js`, body));
             } catch(e) {
                 console.log("There was most likely a network error.");
