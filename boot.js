@@ -276,8 +276,8 @@ async function nd() {
             break;
         }
     }
-
-	else if(cmd.startsWith(`reboot`)) {return boot();}
+	
+    else if(cmd.startsWith(`reboot`)) {return boot();}
 
     // custom commands
     else {
