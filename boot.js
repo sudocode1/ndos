@@ -277,6 +277,8 @@ async function nd() {
         }
     }
 
+	else if(cmd.startsWith(`reboot`)) {return boot();}
+
     // custom commands
     else {
         try {fs.readdirSync(`./commands`)} catch(e) {console.log(`This command does not exist!`)};
