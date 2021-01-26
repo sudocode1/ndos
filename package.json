@@ -1,0 +1,29 @@
+{
+  "name": "ndos",
+  "version": "1.0.0",
+  "description": "Node.JS DOS",
+  "main": "boot.js",
+  "scripts": {
+    "test": "node boot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sudocode1/ndos.git"
+  },
+  "keywords": [
+    "ndos",
+    "nodejs",
+    "node"
+  ],
+  "author": "sudocode1",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/sudocode1/ndos/issues"
+  },
+  "homepage": "https://github.com/sudocode1/ndos#readme",
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "node-fetch": "^2.6.1",
+    "prompt-sync": "^4.2.0"
+  }
+}

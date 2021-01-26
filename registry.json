@@ -1,7 +1,27 @@
 {
+    "DATA": {
+        "VERSION": "MS4w",
+        "DATE": "MS8yNS8yMDIw",
+        "BLUEPRINT": false,
+        "MODIFICATION": {
+            "MODIFIED": false,
+            "MODIFIED_BY": "Enter your name here!"
+        },
+        "GO_ONLINE": true
+    },
+
     "BOOT": {
         "DISABLE_BOOT_SCRIPTS": 0,
         "DISABLE_DEVELOPER_NOTES": 0
+    },
+
+    "SHUTDOWN": {
+        "DISABLE_SHUTDOWN_SCRIPTS": 0
+    },
+
+    "BUS": {
+        "DISABLE_CMD_LOGGING": 0,
+        "DISABLE_CMD_LOGGING_NOTIFICATION": 1
     },
 
     "COMMANDS": {},
@@ -20,7 +40,8 @@
         "JPAC_SHOWN": [1, "jpac <package>", "install an official package"],
         "PACMAN_SHOWN": [1, "pacman <link> <package>", "install an external package"],
         "ECHO_SHOWN": [1, "echo <msg>", "return msg"],
-        "EVAL_SHOWN": [1, "eval <js>", "execute javascript"]
+        "EVAL_SHOWN": [1, "eval <js>", "execute javascript"],
+        "BUS_SHOWN": [1, "bus <read/clear/write> [towrite]", "read or edit the BUS"]
     },
 
     "DIR_CMD": {
