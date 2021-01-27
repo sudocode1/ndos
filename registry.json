@@ -12,7 +12,7 @@
 
     "BOOT": {
         "DISABLE_BOOT_SCRIPTS": 0,
-        "DISABLE_DEVELOPER_NOTES": 0
+        "DISABLE_DEVELOPER_NOTES": 1
     },
 
     "SHUTDOWN": {
