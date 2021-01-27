@@ -224,11 +224,11 @@ async function nd() {
 
         if (cont == true) {
             try {
-                console.log("Fetching file...")
+                console.log("Downloading file...")
                 await fetch(`http://ndosrepos.7m.pl/${spl[1]}.js`)
                 .then(res => res.text())
-                .then(console.log("Downloading..."))
                 .then(body => fs.writeFileSync(`./commands/${spl[1]}.js`, body));
+                .then(console.log(`Downloaded. Run "${spl[1]}" in NDOS to try it out.`))
             } catch(e) {
                 console.log("There was most likely a network error.");
             }
@@ -251,9 +251,11 @@ async function nd() {
             }
     
             try {
+                console.log("Downloading file...")
                 await fetch(`http://${address}/${spl[2]}.js`)
                 .then(res => res.text())
                 .then(body => fs.writeFileSync(`./commands/${spl[2]}.js`, body))
+                .then(console.log(`Downloaded. Run "${spl[1]}" in NDOS to try it out.`))
             } catch (e) {
                 console.log("There was most likely a network error.");
             }
