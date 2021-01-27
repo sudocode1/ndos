@@ -149,14 +149,19 @@ async function nd() {
 
         else {
             let driveExists = true;
-            try {fs.readFileSync(`./drives/${spl[1]}/compress.txt`); driveExists = true;} catch(e) {driveExists = false;fs.mkdirSync(`./drives/${spl[1]}`);};
+            try {fs.readFileSync(`./drives/${spl[1]}/compress.txt`); driveExists = true;} catch(e) {driveExists = false; try {fs.mkdirSync(`./drives/${spl[1]}`);} catch(e) {driveInvalid = true;}};
             if (driveExists == true) {
-                let cont = console.log(`The drive ${spl[1]} already exists.`);
+                console.log(`The drive ${spl[1]} already exists.`);
             }
-            else {    
+            else {
+                if (driveInvalid = true) {
+                    console.log("This drive uses invalid characters.")
+                }
+                else {    
             fs.writeFileSync(`./drives/${spl[1]}/compress.txt`, ``);
             console.log(`${spl[1]} has been created & mounted.`);
         }
+    }
         };
     }
 
