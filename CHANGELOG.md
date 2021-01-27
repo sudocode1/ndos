@@ -1,3 +1,9 @@
+# Fuego Alpha-0.1
+- Added login system 
+- Added `ROOT_USER_WARNING` to the registry
+- Locked `bus` behind admin permissions
+- Added users log
+
 # 1.1
 - Fixed year
 - Adjusted `newdrive` for verification on if a drive already exists or uses invalid characters

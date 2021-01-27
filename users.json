@@ -1,0 +1,7 @@
+{
+    "root": {
+        "name": "root user",
+        "password": "cGFzc3dvcmQ=",
+        "adminstrator": true
+    }
+}

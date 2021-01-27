@@ -1,10 +1,14 @@
 // dependencies
+const { Buffer } = require("buffer");
+const { constants } = require("crypto");
 const fs = require("fs");
 const prompt = require("prompt-sync")();
 const fetch = require("node-fetch");
 let reg = require(`./registry.json`);
+let users = require(`./users.json`);
 
 // data
+let build = Buffer.from(reg.DATA["BUILD"], "base64").toString();
 let version = Buffer.from(reg.DATA["VERSION"], "base64").toString();
 let date = Buffer.from(reg.DATA["DATE"], "base64").toString();
 let blueprint = reg.DATA["BLUEPRINT"];
@@ -20,34 +24,61 @@ try {fs.readFileSync(`./bus/recentcmds.txt`, `utf-8`)} catch(e) {fs.writeFileSyn
 
 function clear() {
     console.clear();
-    console.log(` Welcome to NDOS ${version}`);
-    blueprint && console.log(`\x1b[31m`, `This version of NDOS is a blueprint! Use at your own risk`);
+    console.log(`Welcome to NDOS ${build} ${version}`);
+    blueprint && console.log(`\x1b[31mThis version of NDOS is a blueprint! Use at your own risk`);
     console.log("\x1b[0m");
 }
 
-function boot() {
+async function boot() {
+    // clear
     clear();
+
+    // login
+    let user = prompt(`Username: `);
+    let password = prompt(`Password: `);
+    if (!users[user]) {console.log("Username invalid."); process.exit();}
+    let p = Buffer.from(users[user]["password"], "base64").toString();
+    if (p !== password) {console.log("Your password is incorrect!"); process.exit();};
+
+    if (users[user]["adminstrator"] == true && reg.USERS["ROOT_USER_WARNING"] == 1) {
+        console.log(`\x1b[31mYou are running with elevated priviliges. Continue with caution.`);
+    }
+
+    console.log("\x1b[0m");
+
+    let ver;
+
+    await fetch(`http://ndosrepos.7m.pl/v.txt`)
+    .then(res => res.text())
+    .then(body => ver = body);
+
+    if (ver !== reg.DATA["VERSION"]) console.log(`\x1b[32mA new version is available: ${Buffer.from(ver, "base64").toString()}\x1b[0m(Stable)`);
     
+    // var
     let bootscripts = false;
     let devNotes = true;
 
+    // search for boot folder
     try {fs.readdirSync(`./boot`); bootscripts = true;} catch(e) {console.log(` No boot folder found!`); bootscripts = false;};
 
     reg.BOOT["DISABLE_BOOT_SCRIPTS"] !== 0 ? bootscripts = false : null;
     reg.BOOT["DISABLE_DEVELOPER_NOTES"] !== 0 ? devNotes = false : null;
 
+    // developer notes
     if (devNotes == true) {
-        console.log("Join the Community Discord!\nReport bugs, suggest features and chat with other users!\nhttps://discord.gg/kg96m6AvpZ")
+        console.log("Join the Community Discord!\nReport bugs, suggest features and chat with other users!\nhttps://discord.gg/kg96m6AvpZ");
         console.log(`directories are currently disabled in mount/unmount (alpha-0.6.1 and above)`);
-        console.log(`developed by sudocode1 and 1s3k3b`);
+        console.log(`developed by sudocode1, 1s3k3b and JBMagination`);
         console.log(`Release ${version}, ${date}`);
     }
 
+    // modification notes
     if (reg.DATA.MODIFICATION["MODIFIED"] === true) {
-        console.log(`This build of NDOS is modified`);
+        console.log(`This build of NDOS ${build} is modified`);
         console.log(`Modified by: ${reg.DATA.MODIFICATION["MODIFIED_BY"]}`)
     }
 
+    // boot scripts
     if (bootscripts === true) {
         console.log(`\x1b[33mRunning Boot Scripts`)
         console.log("\x1b[0m");
@@ -56,15 +87,15 @@ function boot() {
         console.log();
     }
 
-    nd();
+    nd(user);
 }
 
 boot();
 
 // script
-async function nd() {
+async function nd(u) {
     // cmd split
-    let cmd = prompt(`ndos>`);
+    let cmd = prompt(`${u}@${build}>`);
     let spl = cmd.split(" ");
 
     // commands
@@ -276,20 +307,27 @@ async function nd() {
     }
 
     else if (cmd.startsWith(`bus`)) {
+        let cont = true;
+        if (users[u]["adminstrator"] !== true) {cont = false};
 
-        switch(spl[1]) {
-            case "read":
-                console.log(fs.readFileSync(`./bus/recentcmds.txt`, `utf-8`));
-            break;
-
-            case "clear":
-                console.log(fs.writeFileSync(`./bus/recentcmds.txt`, ``));
-            break;
-
-            case "write": 
-                console.log(fs.appendFileSync(`./bus/recentcmds.txt`, `${spl.slice(2).join(" ")}\n`));
-            break;
+        if (cont == true) {
+            switch(spl[1]) {
+                case "read":
+                    console.log(fs.readFileSync(`./bus/recentcmds.txt`, `utf-8`));
+                break;
+    
+                case "clear":
+                    console.log(fs.writeFileSync(`./bus/recentcmds.txt`, ``));
+                break;
+    
+                case "write": 
+                    console.log(fs.appendFileSync(`./bus/recentcmds.txt`, `${spl.slice(2).join(" ")}\n`));
+                break;
+            }
+        } else {
+            console.log(`BUS requires Administrator Privilgies`);
         }
+
     }
 	
     else if(cmd.startsWith(`reboot`)) {return boot();}
@@ -308,5 +346,5 @@ async function nd() {
     }
 
     console.log();
-    nd();
+    nd(u);
 };

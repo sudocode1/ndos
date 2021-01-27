@@ -1,8 +1,9 @@
 {
     "DATA": {
-        "VERSION": "MS4x",
-        "DATE": "MS8yNi8yMDIx",
-        "BLUEPRINT": false,
+        "VERSION": "QWxwaGEtMS4w",
+        "DATE": "MS8yNy8yMDIx",
+        "BUILD": "RnVlZ28=",
+        "BLUEPRINT": true,
         "MODIFICATION": {
             "MODIFIED": false,
             "MODIFIED_BY": "Enter your name here!"
@@ -22,6 +23,10 @@
     "BUS": {
         "DISABLE_CMD_LOGGING": 0,
         "DISABLE_CMD_LOGGING_NOTIFICATION": 1
+    },
+
+    "USERS": {
+        "ROOT_USER_WARNING": 1
     },
 
     "COMMANDS": {},
