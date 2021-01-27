@@ -149,14 +149,19 @@ async function nd() {
 
         else {
             let driveExists = true;
-            try {fs.readFileSync(`./drives/${spl[1]}/compress.txt`); driveExists = true;} catch(e) {driveExists = false;fs.mkdirSync(`./drives/${spl[1]}`);};
+            try {fs.readFileSync(`./drives/${spl[1]}/compress.txt`); driveExists = true;} catch(e) {driveExists = false; try {fs.mkdirSync(`./drives/${spl[1]}`);} catch(e) {driveInvalid = true;}};
             if (driveExists == true) {
-                let cont = console.log(`The drive ${spl[1]} already exists.`);
+                console.log(`The drive ${spl[1]} already exists.`);
             }
-            else {    
+            else {
+                if (driveInvalid = true) {
+                    console.log("This drive uses invalid characters.")
+                }
+                else {    
             fs.writeFileSync(`./drives/${spl[1]}/compress.txt`, ``);
             console.log(`${spl[1]} has been created & mounted.`);
         }
+    }
         };
     }
 
@@ -224,11 +229,11 @@ async function nd() {
 
         if (cont == true) {
             try {
-                console.log("Fetching file...")
+                console.log("Downloading file...")
                 await fetch(`http://ndosrepos.7m.pl/${spl[1]}.js`)
                 .then(res => res.text())
-                .then(console.log("Downloading..."))
-                .then(body => fs.writeFileSync(`./commands/${spl[1]}.js`, body));
+                .then(body => fs.writeFileSync(`./commands/${spl[1]}.js`, body))
+                .then(console.log(`Downloaded. Run "${spl[1]}" in NDOS to try it out.`))
             } catch(e) {
                 console.log("There was most likely a network error.");
             }
@@ -251,9 +256,11 @@ async function nd() {
             }
     
             try {
+                console.log("Downloading file...")
                 await fetch(`http://${address}/${spl[2]}.js`)
                 .then(res => res.text())
                 .then(body => fs.writeFileSync(`./commands/${spl[2]}.js`, body))
+                .then(console.log(`Downloaded. Run "${spl[2]}" in NDOS to try it out.`))
             } catch (e) {
                 console.log("There was most likely a network error.");
             }

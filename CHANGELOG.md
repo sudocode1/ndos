@@ -1,8 +1,8 @@
 # 1.1
 - Fixed year
-- Adjusted `newdrive` for verification on if a drive already exists
-- Added basic `jpac` responses (will be edited in the future)
-- Added start script for Windows
+- Adjusted `newdrive` for verification on if a drive already exists or uses invalid characters
+- Added basic `jpac` and `pacman` responses (may be edited in the future)
+- Added start scripts
 
 # 1.01
 - Added `reboot` command
