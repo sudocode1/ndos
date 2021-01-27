@@ -1,4 +1,11 @@
-# Fuego Alpha-0.1
+# Fuego Alpha-1.1
+- Added `newuser`
+- Added `lock`
+- Added user administrator check before checking `DISABLE_CMD_LOGGING_NOTIFICATION`
+- Changed passwords to utf8 -> sha256 -> base64 (previously utf8 -> base64)
+
+
+# Fuego Alpha-1.0
 - Added login system 
 - Added `ROOT_USER_WARNING` to the registry
 - Locked `bus` behind admin permissions
