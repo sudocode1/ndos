@@ -1,3 +1,8 @@
+# Fuego Alpha-1.2
+- Added support for menus
+- Added login menu (capped at 9 users)
+- Added user administrator check before using `newuser`
+
 # Fuego Alpha-1.1
 - Added `newuser`
 - Added `lock`

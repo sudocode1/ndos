@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/sudocode1/ndos#readme",
   "dependencies": {
+    "console-menu": "^0.1.0",
     "fs": "^0.0.1-security",
     "node-fetch": "^2.6.1",
     "prompt-sync": "^4.2.0"

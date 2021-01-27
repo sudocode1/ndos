@@ -3,6 +3,7 @@ const fs = require("fs");
 const prompt = require("prompt-sync")();
 const fetch = require("node-fetch");
 const crypto = require("crypto");
+const menu = require("console-menu");
 let reg = require(`./registry.json`);
 let users = JSON.parse(fs.readFileSync(`./users.json`, `utf-8`));
 
@@ -33,13 +34,26 @@ async function boot() {
     clear();
 
     // login
-    let user = prompt(`Username: `);
+    let uList = [];
+    uList = Object.entries(users);
+
+    let user;
+
+    await menu(Array.from({ length: Math.min(uList.length, 9) }, (_, i) => ({ hotkey: i + '', title: uList[i][0] })), {header: "Login Menu", border: true})
+    .then(item => {
+        if (item) user = item.title
+        else {console.log("Menu Cancelled"); process.exit();}
+    });
+    
+
+
     let pass = prompt(`Password: `);
     let word = require('crypto').createHash('sha256').update(pass).digest('base64');
     if (!users[user]) {console.log("Username invalid."); process.exit();}
     let p = users[user].password;
     if (p !== word) {console.log("Your password is incorrect!"); process.exit();};
 
+    // admin warn
     if (users[user]["adminstrator"] == true && reg.USERS["ROOT_USER_WARNING"] == 1) {
         console.log(`\x1b[31mYou are running with elevated priviliges. Continue with caution.`);
     }
@@ -338,12 +352,16 @@ async function nd(u) {
         let password = prompt("password: ");
         let cont = true;
 
+        users[u].adminstrator !== true ? (console.log(`You do not have permission`), cont = false) : null;
         users[user] ? (console.log(`This user already exists!`), cont = false) : null;
+
+        password = password.trim();
         
         if (cont == true) {
             users[user] = {
                 name: name,
-                password: require('crypto').createHash('sha256').update(password).digest('base64')
+                password: require('crypto').createHash('sha256').update(password).digest('base64'),
+                adminstrator: false
             }
 
             fs.writeFileSync(`./users.json`, JSON.stringify(users));
