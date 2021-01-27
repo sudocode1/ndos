@@ -1,11 +1,10 @@
 // dependencies
-const { Buffer } = require("buffer");
-const { constants } = require("crypto");
 const fs = require("fs");
 const prompt = require("prompt-sync")();
 const fetch = require("node-fetch");
+const crypto = require("crypto");
 let reg = require(`./registry.json`);
-let users = require(`./users.json`);
+let users = JSON.parse(fs.readFileSync(`./users.json`, `utf-8`));
 
 // data
 let build = Buffer.from(reg.DATA["BUILD"], "base64").toString();
@@ -35,10 +34,11 @@ async function boot() {
 
     // login
     let user = prompt(`Username: `);
-    let password = prompt(`Password: `);
+    let pass = prompt(`Password: `);
+    let word = require('crypto').createHash('sha256').update(pass).digest('base64');
     if (!users[user]) {console.log("Username invalid."); process.exit();}
-    let p = Buffer.from(users[user]["password"], "base64").toString();
-    if (p !== password) {console.log("Your password is incorrect!"); process.exit();};
+    let p = users[user].password;
+    if (p !== word) {console.log("Your password is incorrect!"); process.exit();};
 
     if (users[user]["adminstrator"] == true && reg.USERS["ROOT_USER_WARNING"] == 1) {
         console.log(`\x1b[31mYou are running with elevated priviliges. Continue with caution.`);
@@ -52,7 +52,7 @@ async function boot() {
     .then(res => res.text())
     .then(body => ver = body);
 
-    if (ver !== reg.DATA["VERSION"]) console.log(`\x1b[32mA new version is available: ${Buffer.from(ver, "base64").toString()}\x1b[0m(Stable)`);
+    if (ver !== reg.DATA["VERSION"]) console.log(`\x1b[32mA new version is available: ${Buffer.from(ver, "base64").toString()}\x1b[0m (Stable)`);
     
     // var
     let bootscripts = false;
@@ -330,7 +330,58 @@ async function nd(u) {
 
     }
 	
-    else if(cmd.startsWith(`reboot`)) {return boot();}
+    else if(cmd.startsWith(`reboot`) || cmd.startsWith(`logout`)) {return boot();}
+
+    else if (cmd.startsWith(`newuser`)) {
+        let user = prompt("username: ");
+        let name = prompt("name: ")
+        let password = prompt("password: ");
+        let cont = true;
+
+        users[user] ? (console.log(`This user already exists!`), cont = false) : null;
+        
+        if (cont == true) {
+            users[user] = {
+                name: name,
+                password: require('crypto').createHash('sha256').update(password).digest('base64')
+            }
+
+            fs.writeFileSync(`./users.json`, JSON.stringify(users));
+            console.log(`New user created: ${user}`);
+        }
+
+    }
+
+    else if(cmd.startsWith(`lock`)) {
+        let cont = false;
+        
+        let password = prompt(`${u} password: `);
+
+        if (require('crypto').createHash('sha256').update(password).digest('base64') == users[u].password) cont = true;
+
+        if (cont == true) null
+        else {
+            console.log(`\nPassword Incorrect!`);
+
+            let password2 = prompt(`${u} password: `);
+
+            if (require('crypto').createHash('sha256').update(password2).digest('base64') == users[u].password) cont = true;
+
+
+            if (cont == true) null
+            else {
+                console.log(`\nPassword Incorrect!`);
+
+                let password3 = prompt(`${u} password: `);
+    
+                if (require('crypto').createHash('sha256').update(password3).digest('base64') == users[u].password) cont = true;
+    
+                if (cont == true) null;
+                else {console.log(`\nPassword Incorrect!`); process.exit();}
+            }
+        }
+
+    }
 
     // custom commands
     else {
@@ -342,7 +393,8 @@ async function nd(u) {
     if (reg.BUS["DISABLE_CMD_LOGGING"] !== 1) {
         fs.appendFileSync(`./bus/recentcmds.txt`, `${cmd} ${Date.now()}\n`);
 
-        if (reg.BUS["DISABLE_CMD_LOGGING_NOTIFICATION"] !== 1) console.log(`BUS_CMD_LOGGING has logged ${cmd} to /bus/recentcmds.txt`);
+        if (users[u].adminstrator !== true) {}
+        else if (reg.BUS["DISABLE_CMD_LOGGING_NOTIFICATION"] !== 1) {console.log(`BUS_CMD_LOGGING has logged ${cmd} to /bus/recentcmds.txt`)};
     }
 
     console.log();
