@@ -1,3 +1,6 @@
+# Fuego Alpha-2.1.1
+- Fixed release
+
 # Fuego Alpha-2.1
 - Added `Other user` to the login menu
 - Added menu to `mount`
