@@ -1,7 +1,7 @@
 {
     "DATA": {
-        "VERSION": "QWxwaGEtMi4xMQ==",
-        "DATE": "MS8yOC8yMDIx",
+        "VERSION": "QWxwaGEtMy4w",
+        "DATE": "MS8yOC8yMDIw",
         "BUILD": "RnVlZ28=",
         "BLUEPRINT": true,
         "MODIFICATION": {
@@ -27,6 +27,16 @@
 
     "USERS": {
         "ROOT_USER_WARNING": 1
+    },
+
+    "START_MENU": {
+        "START_DEFAULT": true,
+        "COMMANDS": [
+            "help",
+            "read",
+            "exit",
+            "dir"
+        ]
     },
 
     "COMMANDS": {},

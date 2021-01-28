@@ -12,6 +12,7 @@ let build = Buffer.from(reg.DATA["BUILD"], "base64").toString();
 let version = Buffer.from(reg.DATA["VERSION"], "base64").toString();
 let date = Buffer.from(reg.DATA["DATE"], "base64").toString();
 let blueprint = reg.DATA["BLUEPRINT"];
+let start = reg.START_MENU["START_DEFAULT"];
 
 // boot
 try {fs.readdirSync(`./commands`)} catch(e) {fs.mkdirSync(`commands`)};
@@ -113,9 +114,25 @@ boot();
 
 // script
 async function nd(u) {
+    let cmd;
     
+    if (start == true) {
+        let menuList = Array.from({ length: Math.min(reg.START_MENU["COMMANDS"].length, 9) }, (_, i) => ({ hotkey: i + '', title: reg.START_MENU["COMMANDS"][i] }));
+        menuList.push({ separator: true });
+        menuList.push({ hotkey: ">", title: "Enter terminal command"});
+        menuList.push({ hotkey: "?", title: "Back to terminal" });
+
+        await menu(menuList, {header: "Start Menu", border: true})
+        .then(item => {
+            if (item && item.title == "Back to terminal") {start = false; cmd = prompt(`${u}@${build}>`)}
+            else if (item && item.title == "Enter terminal command") {cmd = prompt(`${u}@${build}>`)}
+            else if (item) {cmd = item.title}
+            else {cmd = prompt(`${u}@${build}>`)}
+        });
+    } else if (start == false) {cmd = prompt(`${u}@${build}>`)};
+
+
     // cmd split
-    let cmd = prompt(`${u}@${build}>`);
     let spl = cmd.split(" ");
 
     // commands
@@ -440,6 +457,11 @@ async function nd(u) {
             }
         }
 
+    }
+
+    else if (cmd.startsWith(`start`)) {
+        console.log("Swapping to the start menu.");
+        start = true;
     }
 
     // custom commands
