@@ -1,6 +1,6 @@
 {
     "DATA": {
-        "VERSION": "QWxwaGEtMy4x",
+        "VERSION": "QWxwaGEtMy4xLjE=",
         "DATE": "MS8yOC8yMDIw",
         "BUILD": "RnVlZ28=",
         "BLUEPRINT": true,
@@ -13,7 +13,7 @@
 
     "BOOT": {
         "DISABLE_BOOT_SCRIPTS": 0,
-        "DISABLE_DEVELOPER_NOTES": 0
+        "DISABLE_DEVELOPER_NOTES": 1
     },
 
     "SHUTDOWN": {
@@ -30,7 +30,7 @@
     },
 
     "START_MENU": {
-        "START_DEFAULT": true,
+        "START_DEFAULT": false,
         "COMMANDS": [
             "help",
             "read",

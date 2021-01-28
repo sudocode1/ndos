@@ -146,7 +146,7 @@ async function nd(u) {
             if (x[1][0] == 1) c.push([x[1][1], x[1][2]]); 
         });
 
-        console.log(`Commands in NDOS ${version}`);
+        console.log(`Commands in NDOS ${build} ${version}`);
         c.map(x => console.log(`${x[0]}: ${x[1]}`));
     }
 
