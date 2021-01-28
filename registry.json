@@ -1,6 +1,6 @@
 {
     "DATA": {
-        "VERSION": "QWxwaGEtMy4w",
+        "VERSION": "QWxwaGEtMy4x",
         "DATE": "MS8yOC8yMDIw",
         "BUILD": "RnVlZ28=",
         "BLUEPRINT": true,
@@ -56,7 +56,12 @@
         "PACMAN_SHOWN": [1, "pacman <link> <package>", "install an external package"],
         "ECHO_SHOWN": [1, "echo <msg>", "return msg"],
         "EVAL_SHOWN": [1, "eval <js>", "execute javascript"],
-        "BUS_SHOWN": [1, "bus <read/clear/write> [towrite]", "read or edit the BUS"]
+        "BUS_SHOWN": [1, "bus <read/clear/write> [towrite]", "read or edit the BUS"],
+        "REBOOT_SHOWN": [1, "reboot", "reboot NDOS"],
+        "LOGOUT_SHOWN": [1, "logout", "log out"],
+        "NEWUSER_SHOWN": [1, "newuser", "create a new user"],
+        "LOCK_SHOWN": [1, "lock", "lock NDOS"],
+        "START_SHOWN": [1, "start", "switch to the start menu"]
     },
 
     "DIR_CMD": {

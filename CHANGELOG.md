@@ -1,3 +1,7 @@
+# Fuego Alpha-3.1
+- Added all new commands to `help`
+- Fixed the registry
+
 # Fuego Alpha-3.0
 - Added the start menu
 - Added `START_MENU.START_DEFAULT` to the registry
