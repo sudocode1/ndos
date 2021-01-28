@@ -1,3 +1,8 @@
+# Fuego Alpha-1.3
+- Added `Other user` to the login menu
+- Added menu to `mount`
+- Added menu to `unmount`
+
 # Fuego Alpha-1.2
 - Added support for menus
 - Added login menu (capped at 9 users)

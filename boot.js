@@ -38,10 +38,14 @@ async function boot() {
     uList = Object.entries(users);
 
     let user;
+    let userArray = Array.from({ length: Math.min(uList.length, 9) }, (_, i) => ({ hotkey: i + '', title: uList[i][0] }));
+    userArray.push({ separator: true });
+    userArray.push({ hotkey: "?", title: "Other user" })
 
-    await menu(Array.from({ length: Math.min(uList.length, 9) }, (_, i) => ({ hotkey: i + '', title: uList[i][0] })), {header: "Login Menu", border: true})
+    await menu(userArray, {header: "Login Menu", border: true})
     .then(item => {
-        if (item) user = item.title
+        if (item && item.title == "Other user") {user = prompt("Username: ")}
+        else if (item) user = item.title
         else {console.log("Menu Cancelled"); process.exit();}
     });
     
@@ -101,6 +105,7 @@ async function boot() {
         console.log();
     }
 
+    console.log(`Welcome Back, ${users[user].name}\n`);
     nd(user);
 }
 
@@ -108,6 +113,7 @@ boot();
 
 // script
 async function nd(u) {
+    
     // cmd split
     let cmd = prompt(`${u}@${build}>`);
     let spl = cmd.split(" ");
@@ -194,12 +200,16 @@ async function nd(u) {
 
         else {
             let driveExists = true;
-            try {fs.readFileSync(`./drives/${spl[1]}/compress.txt`); driveExists = true;} catch(e) {driveExists = false; try {fs.mkdirSync(`./drives/${spl[1]}`);} catch(e) {driveInvalid = true;}};
+            let driveInvalid = false;
+            try {fs.readFileSync(`./drives/${spl[1]}/compress.txt`); driveExists = true;} 
+            catch(e) {driveExists = false; try {fs.mkdirSync(`./drives/${spl[1]}`);} catch(e) {driveInvalid = true; console.log(e)}};
+
+
             if (driveExists == true) {
                 console.log(`The drive ${spl[1]} already exists.`);
             }
             else {
-                if (driveInvalid = true) {
+                if (driveInvalid == true) {
                     console.log("This drive uses invalid characters.")
                 }
                 else {    
@@ -211,61 +221,92 @@ async function nd(u) {
     }
 
     else if (cmd.startsWith(`mount`)) {
-        if (!spl[1]) console.log(`Argument unsatisfied.`)
-        else {
-            let cont;
+        let dr;
+        let driveList = fs.readdirSync(`./drives`);
 
-            try {fs.readFileSync(`./drives/${spl[1]}/compress.txt`, `utf-8`); cont = true;} catch(e) {console.log("There was an error reading the compression."); cont = false;};
+        let menuArr = Array.from({ length: Math.min(driveList.length, 9) }, (_, i) => ({ hotkey: i + '', title: driveList[i][0] }));
+        menuArr.push({ separator: true });
+        menuArr.push({ hotkey: "?", title: "Other drive" });
+
+        if (!spl[1]) {
+            await menu(menuArr, {header: "Drive Menu", border: true})
+            .then(item => {
+                if (item && item.title == "Other drive") {
+                    dr = prompt("Drive: ");
+                } else if(item) {
+                    dr = item.title;
+                } else {console.log(dr = "leave")}
+            })
+        } else {dr = spl[1]};
+
+        let cont;
+
+        try {fs.readFileSync(`./drives/${dr}/compress.txt`, `utf-8`); cont = true;} catch(e) {console.log("There was an error reading the compression."); cont = false;};
             
-            if (cont == true) {
-                let file = fs.readFileSync(`./drives/${spl[1]}/compress.txt`, `utf-8`).toString();
-                let f = file.split("|");
+        if (cont == true) {
+            let file = fs.readFileSync(`./drives/${dr}/compress.txt`, `utf-8`).toString();
+            let f = file.split("|");
 
-                function check(toCheck, drive) {
-                    let split = toCheck.split(`,`);
+            function check(toCheck, drive) {
+                let split = toCheck.split(`,`);
 
-                    if(split[0] == `file`) {
-                        fs.writeFileSync(`./drives/${drive}/${split[1]}`, Buffer.from(split[2], "base64").toString());
-                    }
+                if(split[0] == `file`) {
+                    fs.writeFileSync(`./drives/${drive}/${split[1]}`, Buffer.from(split[2], "base64").toString());
                 }
-
-                f.map(x => check(x, spl[1]));
-                
             }
-            else null;
 
+            f.map(x => check(x, dr));
+                
         }
+        else null;
+
     }
+    
 
     else if (cmd.startsWith(`unmount`)) {
-        if (!spl[1]) console.log(`Argument unsatisfied.`)
-        else {
-            let cont;
-            let str = "";
+        let dr;
+        let driveList = fs.readdirSync(`./drives`);
 
-            try {fs.readdirSync(`./drives/${spl[1]}`); cont = true;} catch(e) {cont = false;};
+        let menuArr = Array.from({ length: Math.min(driveList.length, 9) }, (_, i) => ({ hotkey: i + '', title: driveList[i][0] }));
+        menuArr.push({ separator: true });
+        menuArr.push({ hotkey: "?", title: "Other drive" });
 
-            if (cont == true) {
-                fs.writeFileSync(`./drives/${spl[1]}/compress.txt`, "");
-                fs.readdirSync(`./drives/${spl[1]}`).map(x => {
-                    if (x == `compress.txt`) return;
-                    let result;
+        if (!spl[1]) {
+            await menu(menuArr, {header: "Drive menu", border: true}).then(item => {
+                if (item && item.title == "Other drive") {
+                    dr = prompt("Drive: ");
+                } else if(item) {
+                    dr = item.title;
+                } else {console.log(dr = "leave")}
+            });
+        } else {dr = spl[1]};
 
-                    try {fs.readFileSync(`./drives/${spl[1]}/${x}`, `utf-8`); result = "f";}
-                    catch(e) {console.log(`${x} is a directory.\nDirectories are not currently supported.`); result = "d"}
-                    finally {if (result === "f") {
-                        str += `file,${x},` + Buffer.from(fs.readFileSync(`./drives/${spl[1]}/${x}`, `utf-8`).toString()).toString("base64") + `|`;
-                        fs.rmSync(`./drives/${spl[1]}/${x}`);
-                    }};
+        let cont;
+        let str = "";
 
-                });
+        try {fs.readdirSync(`./drives/${dr}`); cont = true;} catch(e) {cont = false;};
 
-                fs.writeFileSync(`./drives/${spl[1]}/compress.txt`, str);
-            }
-            else null;
+        if (cont == true) {
+            fs.writeFileSync(`./drives/${dr}/compress.txt`, "");
+            fs.readdirSync(`./drives/${dr}`).map(x => {
+                if (x == `compress.txt`) return;
+                let result;
 
+                try {fs.readFileSync(`./drives/${dr}/${x}`, `utf-8`); result = "f";}
+                catch(e) {console.log(`${x} is a directory.\nDirectories are not currently supported.`); result = "d"}
+                finally {if (result === "f") {
+                    str += `file,${x},` + Buffer.from(fs.readFileSync(`./drives/${dr}/${x}`, `utf-8`).toString()).toString("base64") + `|`;
+                    fs.rmSync(`./drives/${dr}/${x}`);
+                }};
 
+            });
+
+            fs.writeFileSync(`./drives/${dr}/compress.txt`, str);
         }
+        else null;
+
+
+        
     }
 
     else if (cmd.startsWith(`jpac`)) {
