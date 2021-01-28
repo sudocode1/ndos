@@ -5,6 +5,9 @@ const fetch = require("node-fetch");
 const crypto = require("crypto");
 const menu = require("console-menu");
 let reg = require(`./registry.json`);
+const { findBestMatch } = require("string-similarity");
+const { defaultCipherList } = require("constants");
+const { execSync } = require("child_process");
 let users = JSON.parse(fs.readFileSync(`./users.json`, `utf-8`));
 
 // data
@@ -331,17 +334,24 @@ async function nd(u) {
         if (reg.DATA["GO_ONLINE"] == false) {cont = false; console.log(`DATA.GO_ONLINE is disabled! Change it in the registry.`)};
 
         if (cont == true) {
-            try {
-                console.log("Downloading file...")
-                await fetch(`http://ndosrepos.7m.pl/${spl[1]}.js`)
-                .then(res => res.text())
-                .then(body => fs.writeFileSync(`./commands/${spl[1]}.js`, body))
-                .then(console.log(`Downloaded. Run "${spl[1]}" in NDOS to try it out.`))
-            } catch(e) {
-                console.log("There was most likely a network error.");
+            const all = await fetch('http://ndosrepos.7m.pl/packages')
+                .then(d => d.text())
+                .then(d => d.match(/(?<=<a href=")[^\."]+(?=\.[^\."]+">)/g));
+            const closest = findBestMatch(spl[1] || '', all).bestMatch;
+            const name = closest.rating < 0.7
+                ? await menu(
+                    all.map((x, i) => ({ hotkey: i + 1 + '', title: x })),
+                    { header: 'JPAC Packages', border: true },
+                ).then(d => d && d.title)
+                : closest.target;
+            if (!name) console.log('No package selected.');
+            else {
+                const code = await fetch(`http://ndosrepos.7m.pl/${name}.js`).then(d => d.text());
+                const deps = await fetch(`http://ndosrepos.7m.pl/packages/${name}.txt`).then(d => d.json());
+                fs.writeFileSync(`./commands/${name}.js`, code);
+                if (deps.length) execSync(`npm i ${deps.join(' ')}`);
+                console.log(`Successfully installed ${name}.`);
             }
-
-
         }
         
     }
