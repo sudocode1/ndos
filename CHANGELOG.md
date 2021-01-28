@@ -1,3 +1,6 @@
+# Fuego Alpha-4.0
+- jpacV2 implemented
+
 # Fuego Alpha-3.1.1
 - Changed `START.MENU.START_DEFAULT` to `false` by default
 - Disabled developer notes by default
