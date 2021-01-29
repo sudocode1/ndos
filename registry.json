@@ -1,7 +1,7 @@
 {
     "DATA": {
-        "VERSION": "QWxwaGEtMy4xLjE=",
-        "DATE": "MS8yOC8yMDIw",
+        "VERSION": "QWxwaGEtNC4x",
+        "DATE": "MS8yOS8yMDIx",
         "BUILD": "RnVlZ28=",
         "BLUEPRINT": true,
         "MODIFICATION": {
@@ -61,7 +61,8 @@
         "LOGOUT_SHOWN": [1, "logout", "log out"],
         "NEWUSER_SHOWN": [1, "newuser", "create a new user"],
         "LOCK_SHOWN": [1, "lock", "lock NDOS"],
-        "START_SHOWN": [1, "start", "switch to the start menu"]
+        "START_SHOWN": [1, "start", "switch to the start menu"],
+        "RM_SHOWN": [1, "rm <-f/-d> <file/directory>", "remove a file or directory"]
     },
 
     "DIR_CMD": {

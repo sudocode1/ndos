@@ -474,6 +474,22 @@ async function nd(u) {
         start = true;
     }
 
+    else if (cmd.startsWith(`rm`)) {
+        switch(spl[1]) {
+            case "-f":
+                try {console.log(`Removing...`); fs.rmSync(`${spl[2]}`);} catch(e) {console.log(`There was an error.`)};
+            break;
+
+            case "-d":
+                try {console.log(`Removing...`); fs.rmdirSync(`${spl[2]}`);} catch(e) {console.log(`There was an error.`)};
+            break;
+
+            default:
+                console.log("Invalid!");
+        }
+    }
+
+
     // custom commands
     else {
         try {fs.readdirSync(`./commands`)} catch(e) {console.log(`This command does not exist!`)};
