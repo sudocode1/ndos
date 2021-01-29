@@ -1,9 +1,8 @@
 {
     "DATA": {
-        "VERSION": "QWxwaGEtNC4x",
-        "DATE": "MS8yOS8yMDIx",
-        "BUILD": "RnVlZ28=",
-        "BLUEPRINT": true,
+        "VERSION": "a",
+        "DATE": "MS8yNS8yMDIw",
+        "BLUEPRINT": false,
         "MODIFICATION": {
             "MODIFIED": false,
             "MODIFIED_BY": "Enter your name here!"
@@ -13,7 +12,7 @@
 
     "BOOT": {
         "DISABLE_BOOT_SCRIPTS": 0,
-        "DISABLE_DEVELOPER_NOTES": 1
+        "DISABLE_DEVELOPER_NOTES": 0
     },
 
     "SHUTDOWN": {
@@ -23,20 +22,6 @@
     "BUS": {
         "DISABLE_CMD_LOGGING": 0,
         "DISABLE_CMD_LOGGING_NOTIFICATION": 1
-    },
-
-    "USERS": {
-        "ROOT_USER_WARNING": 1
-    },
-
-    "START_MENU": {
-        "START_DEFAULT": false,
-        "COMMANDS": [
-            "help",
-            "read",
-            "exit",
-            "dir"
-        ]
     },
 
     "COMMANDS": {},
@@ -56,13 +41,7 @@
         "PACMAN_SHOWN": [1, "pacman <link> <package>", "install an external package"],
         "ECHO_SHOWN": [1, "echo <msg>", "return msg"],
         "EVAL_SHOWN": [1, "eval <js>", "execute javascript"],
-        "BUS_SHOWN": [1, "bus <read/clear/write> [towrite]", "read or edit the BUS"],
-        "REBOOT_SHOWN": [1, "reboot", "reboot NDOS"],
-        "LOGOUT_SHOWN": [1, "logout", "log out"],
-        "NEWUSER_SHOWN": [1, "newuser", "create a new user"],
-        "LOCK_SHOWN": [1, "lock", "lock NDOS"],
-        "START_SHOWN": [1, "start", "switch to the start menu"],
-        "RM_SHOWN": [1, "rm <-f/-d> <file/directory>", "remove a file or directory"]
+        "BUS_SHOWN": [1, "bus <read/clear/write> [towrite]", "read or edit the BUS"]
     },
 
     "DIR_CMD": {
