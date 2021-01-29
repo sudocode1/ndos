@@ -1,3 +1,6 @@
+# Fuego Alpha-4.1
+- Added remove command
+
 # Fuego Alpha-4.0
 - jpacV2 implemented
 
