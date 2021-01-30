@@ -289,7 +289,7 @@ async function nd() {
     // custom commands
     else {
         try {fs.readdirSync(`./commands`)} catch(e) {console.log(`This command does not exist!`)};
-        fs.readdirSync(`./commands`).includes(`${cmd}.js`) ? eval(fs.readFileSync(`./commands/${cmd}.js`, `utf-8`)) : console.log("This command does not exist!");
+        fs.readdirSync(`./commands`).includes(`${cmd}.js`) ? await eval(`(async () => {${fs.readFileSync(`./commands/${cmd}.js`, `utf-8`)}})();`) : console.log("This command does not exist!");
     }
 
     // bus
