@@ -1,3 +1,6 @@
+# 1.2
+- Fix custom commands
+
 # 1.1
 - Fixed year
 - Adjusted `newdrive` for verification on if a drive already exists or uses invalid characters
