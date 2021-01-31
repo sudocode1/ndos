@@ -33,6 +33,19 @@ function clear() {
     console.log("\x1b[0m");
 }
 
+function avScan(toScan) {
+    toScan = toScan.toString();
+    let result = [];
+
+    let scanArray = ["rmSync", "rm", "rmdirSync", "rmdir", "writeFile", "writeFileSync", "boot.js", "boot", "users", "registry"];
+
+    scanArray.some(x => {
+        if (toScan.includes(x)) {result.push(x)};
+    });
+
+    return result;
+}
+
 async function boot() {
     // clear
     clear();
@@ -62,7 +75,7 @@ async function boot() {
     if (p !== word) {console.log("Your password is incorrect!"); process.exit();};
 
     // admin warn
-    if (users[user]["adminstrator"] == true && reg.USERS["ROOT_USER_WARNING"] == 1) {
+    if (users[user]["administrator"] == true && reg.USERS["ROOT_USER_WARNING"] == 1) {
         console.log(`\x1b[31mYou are running with elevated priviliges. Continue with caution.`);
     }
 
@@ -390,7 +403,7 @@ async function nd(u) {
 
     else if (cmd.startsWith(`bus`)) {
         let cont = true;
-        if (users[u]["adminstrator"] !== true) {cont = false};
+        if (users[u]["administrator"] !== true) {cont = false};
 
         if (cont == true) {
             switch(spl[1]) {
@@ -420,7 +433,7 @@ async function nd(u) {
         let password = prompt("password: ");
         let cont = true;
 
-        users[u].adminstrator !== true ? (console.log(`You do not have permission`), cont = false) : null;
+        users[u].administrator !== true ? (console.log(`You do not have permission`), cont = false) : null;
         users[user] ? (console.log(`This user already exists!`), cont = false) : null;
 
         password = password.trim();
@@ -429,7 +442,7 @@ async function nd(u) {
             users[user] = {
                 name: name,
                 password: require('crypto').createHash('sha256').update(password).digest('base64'),
-                adminstrator: false
+                administrator: false
             }
 
             fs.writeFileSync(`./users.json`, JSON.stringify(users));
@@ -475,32 +488,63 @@ async function nd(u) {
     }
 
     else if (cmd.startsWith(`rm`)) {
-        switch(spl[1]) {
-            case "-f":
-                try {console.log(`Removing...`); fs.rmSync(`${spl[2]}`);} catch(e) {console.log(`There was an error.`)};
-            break;
+        let cont = true;
 
-            case "-d":
-                try {console.log(`Removing...`); fs.rmdirSync(`${spl[2]}`);} catch(e) {console.log(`There was an error.`)};
-            break;
+        users[u].administrator !== true ? (console.log("You do not have permission"), cont = false) : null;
 
-            default:
-                console.log("Invalid!");
+        if (cont == true) {
+            switch(spl[1]) {
+                case "-f":
+                    try {console.log(`Removing...`); fs.rmSync(`${spl[2]}`);} catch(e) {console.log(`There was an error.`)};
+                break;
+    
+                case "-d":
+                    try {console.log(`Removing...`); fs.rmdirSync(`${spl[2]}`);} catch(e) {console.log(`There was an error.`)};
+                break;
+    
+                default:
+                    console.log("Invalid!");
+            }
         }
+    }
+
+    else if (cmd.startsWith(`av`)) {
+        switch (spl[1]) {
+            case "scan":
+                let r = avScan(fs.readFileSync(spl[2], `utf-8`));
+                console.log(r);
+
+                if (r.length == 0) console.log(`There were no issues found. This file should be safe to run.`)
+                else {
+                    console.log(`\x1b[31mWarning!\x1b[37m Issues were found!`);
+                    r.map(x => console.log(x));
+                }
+            break;
+
+            case "info": 
+                reg.DATA.AV["AV_INFO"].map(x => console.log(x));
+            break;
+        }
+    }
+
+    else if (cmd.startsWith(`attrib`)) {
+        let obj = Object.entries(fs.statSync(spl[1]));
+
+        obj.map(x => console.log(x[0] + ": ", x[1]));
     }
 
 
     // custom commands
     else {
         try {fs.readdirSync(`./commands`)} catch(e) {console.log(`This command does not exist!`)};
-        fs.readdirSync(`./commands`).includes(`${cmd}.js`) ? eval(fs.readFileSync(`./commands/${cmd}.js`, `utf-8`)) : console.log("This command does not exist!");
+        fs.readdirSync(`./commands`).includes(`${cmd}.js`) ? await eval(`(async () => {${fs.readFileSync(`./commands/${cmd}.js`, `utf-8`)}})();`) : console.log("This command does not exist!");
     }
 
     // bus
     if (reg.BUS["DISABLE_CMD_LOGGING"] !== 1) {
         fs.appendFileSync(`./bus/recentcmds.txt`, `${cmd} ${Date.now()}\n`);
 
-        if (users[u].adminstrator !== true) {}
+        if (users[u].administrator !== true) {}
         else if (reg.BUS["DISABLE_CMD_LOGGING_NOTIFICATION"] !== 1) {console.log(`BUS_CMD_LOGGING has logged ${cmd} to /bus/recentcmds.txt`)};
     }
 

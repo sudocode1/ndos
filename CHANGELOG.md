@@ -1,3 +1,10 @@
+# Fuego Alpha-5.0
+- Added NDOS 1.2 package fix
+- `adminstrator` is now `administrator` 
+- Added very basic AntiVirus
+- `DATA.AV.AV_INFO` added to the registry
+- Remove pre-Fuego versions from the changelog
+
 # Fuego Alpha-4.1
 - Added remove command
 

@@ -1,19 +1,28 @@
 {
     "DATA": {
-        "VERSION": "QWxwaGEtNC4x",
-        "DATE": "MS8yOS8yMDIx",
+        "VERSION": "QWxwaGEtNS4w",
+        "DATE": "MS8zMS8yMDIx",
         "BUILD": "RnVlZ28=",
         "BLUEPRINT": true,
         "MODIFICATION": {
             "MODIFIED": false,
             "MODIFIED_BY": "Enter your name here!"
         },
+        "AV": {
+            "AV_INFO": [
+                "NDOS Protect 1.0",
+                "Basic protection for NDOS, created by the developers"
+            ]
+        },
         "GO_ONLINE": true
     },
 
     "BOOT": {
         "DISABLE_BOOT_SCRIPTS": 0,
-        "DISABLE_DEVELOPER_NOTES": 1
+        "DISABLE_DEVELOPER_NOTES": 1,
+        "BOOT_MENU": {
+            "BOOT_MENU_ENABLED": true
+        }
     },
 
     "SHUTDOWN": {
@@ -62,7 +71,9 @@
         "NEWUSER_SHOWN": [1, "newuser", "create a new user"],
         "LOCK_SHOWN": [1, "lock", "lock NDOS"],
         "START_SHOWN": [1, "start", "switch to the start menu"],
-        "RM_SHOWN": [1, "rm <-f/-d> <file/directory>", "remove a file or directory"]
+        "RM_SHOWN": [1, "rm <-f/-d> <file/directory>", "remove a file or directory"],
+        "AV_SHOWN": [1, "av <scan/info> [fileToScan]", "scan a file or find AV info"],
+        "ATTRIB_SHOWN": [1, "attrib <file>", "find file attributes"]
     },
 
     "DIR_CMD": {
