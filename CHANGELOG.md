@@ -1,3 +1,18 @@
+# Fuego Alpha-6.0
+- Added operating on directories
+- Added `cd`
+- Added `/` check on `rm`
+- Added AV Scan on `pacman`
+- Fixed administrator
+- `color` added
+- `curl` added
+- `date` added
+- `mkdir` added
+- `find` added
+- `ping` added
+- `set` added
+- `copy` added
+
 # Fuego Alpha-5.0
 - Added NDOS 1.2 package fix
 - `adminstrator` is now `administrator` 

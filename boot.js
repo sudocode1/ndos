@@ -6,7 +6,6 @@ const crypto = require("crypto");
 const menu = require("console-menu");
 let reg = require(`./registry.json`);
 const { findBestMatch } = require("string-similarity");
-const { defaultCipherList } = require("constants");
 const { execSync } = require("child_process");
 let users = JSON.parse(fs.readFileSync(`./users.json`, `utf-8`));
 
@@ -24,6 +23,9 @@ try {fs.readdirSync(`./boot`)} catch(e) {fs.mkdirSync(`boot`)};
 try {fs.readdirSync(`./shutdown`)} catch(e) {fs.mkdirSync(`shutdown`)};
 try {fs.readdirSync(`./bus`)} catch(e) {fs.mkdirSync(`bus`)};
 try {fs.readFileSync(`./bus/recentcmds.txt`, `utf-8`)} catch(e) {fs.writeFileSync(`./bus/recentcmds.txt`, ``)};
+
+let vars = {};
+let operatingDirectory = "./";
 
 
 function clear() {
@@ -138,14 +140,14 @@ async function nd(u) {
         menuList.push({ hotkey: ">", title: "Enter terminal command"});
         menuList.push({ hotkey: "?", title: "Back to terminal" });
 
-        await menu(menuList, {header: "Start Menu", border: true})
+        await menu(menuList, {header: `Start Menu (${operatingDirectory})`, border: true})
         .then(item => {
             if (item && item.title == "Back to terminal") {start = false; cmd = prompt(`${u}@${build}>`)}
             else if (item && item.title == "Enter terminal command") {cmd = prompt(`${u}@${build}>`)}
             else if (item) {cmd = item.title}
             else {cmd = prompt(`${u}@${build}>`)}
         });
-    } else if (start == false) {cmd = prompt(`${u}@${build}>`)};
+    } else if (start == false) {cmd = prompt(`${u}@${build}${operatingDirectory}>`)};
 
 
     // cmd split
@@ -167,7 +169,7 @@ async function nd(u) {
     }
 
     else if (cmd.startsWith(`dir`)) {
-        try {!spl[1] ? console.log(fs.readdirSync(reg.DIR_CMD["DEFAULT_DIRECTORY"]).join("\n")) : (console.log(fs.readdirSync(spl[1]).join(`\n`)));}
+        try {!spl[1] ? console.log(fs.readdirSync(operatingDirectory).join("\n")) : (console.log(fs.readdirSync(operatingDirectory + spl[1]).join(`\n`)));}
         catch (e) {console.log(`There was an error accessing this directory.`)};
     }
 
@@ -191,16 +193,16 @@ async function nd(u) {
 
         let override = false;
 
-        try {fs.readFileSync(`${file}`); override = true;} catch(e) {override = false;};
+        try {fs.readFileSync(`${operatingDirectory}${file}`); override = true;} catch(e) {override = false;};
 
         if (override == true) {
             let cont = prompt("This file already exists and the data will be overriden, are you sure [Y/N]? ");
 
-            if (cont == `Y`) {fs.writeFileSync(file, data); console.log(`Written to ${file}!`);}
+            if (cont == `Y`) {fs.writeFileSync(operatingDirectory + file, data); console.log(`Written to ${file}!`);}
             else if (cont == `N`) {}
             else {console.log(`Invalid`);};
         } else {
-            fs.writeFileSync(file, data);
+            fs.writeFileSync(operatingDirectory + file, data);
             console.log(`Written to ${file}!`);
         }
     }
@@ -211,7 +213,7 @@ async function nd(u) {
         if(!spl[1]) file = prompt(`File to read? `);
         else file = spl[1];
 
-        try {console.log(fs.readFileSync(file, `utf-8`))} catch (e) {console.log(`This file failed to read.`)};
+        try {console.log(fs.readFileSync(operatingDirectory + file, `utf-8`))} catch (e) {console.log(`This file failed to read.`)};
     }
 
     else if (cmd.startsWith(`execute`)) {
@@ -221,10 +223,10 @@ async function nd(u) {
         if(!spl[1]) toExc = prompt(`File to execute? `);
         else toExc = spl[1];
 
-        try { fs.readFileSync(toExc); cont = true; } catch (e) { console.log("The file failed to read."); cont = false; };
+        try { fs.readFileSync(operatingDirectory + toExc); cont = true; } catch (e) { console.log("The file failed to read."); cont = false; };
 
         if (cont === true) {
-            try {eval(fs.readFileSync(toExc, `utf-8`))} catch(e) {console.log(e)};
+            try {eval(fs.readFileSync(operatingDirectory + toExc, `utf-8`))} catch(e) {console.log(e)};
         }
     }
 
@@ -386,7 +388,16 @@ async function nd(u) {
                 await fetch(`http://${address}/${spl[2]}.js`)
                 .then(res => res.text())
                 .then(body => fs.writeFileSync(`./commands/${spl[2]}.js`, body))
-                .then(console.log(`Downloaded. Run "${spl[2]}" in NDOS to try it out.`))
+
+                let r = avScan(fs.readFileSync(`./commands/${spl[2]}.js`, `utf-8`));
+                if (r.length !== 0) {
+                    console.log("NDOS Protection has triggered the following warnings:");
+                    console.log(r.join("\n"));
+                    console.log("Proceed with caution.");
+                }
+
+
+                console.log(`Downloaded. Run "${spl[2]}" in NDOS to try it out.`)
             } catch (e) {
                 console.log("There was most likely a network error.");
             }
@@ -491,15 +502,16 @@ async function nd(u) {
         let cont = true;
 
         users[u].administrator !== true ? (console.log("You do not have permission"), cont = false) : null;
+        operatingDirectory == `./` && spl[3] !== "--force" ? (console.log(`Operating on / is dangerous. Add --force to ignore this.`), cont = false) : null;
 
         if (cont == true) {
             switch(spl[1]) {
                 case "-f":
-                    try {console.log(`Removing...`); fs.rmSync(`${spl[2]}`);} catch(e) {console.log(`There was an error.`)};
+                    try {console.log(`Removing...`); fs.rmSync(`${operatingDirectory}${spl[2]}`);} catch(e) {console.log(`There was an error.`)};
                 break;
     
                 case "-d":
-                    try {console.log(`Removing...`); fs.rmdirSync(`${spl[2]}`);} catch(e) {console.log(`There was an error.`)};
+                    try {console.log(`Removing...`); fs.rmdirSync(`${operatingDirectory}${spl[2]}`);} catch(e) {console.log(`There was an error.`)};
                 break;
     
                 default:
@@ -511,7 +523,7 @@ async function nd(u) {
     else if (cmd.startsWith(`av`)) {
         switch (spl[1]) {
             case "scan":
-                let r = avScan(fs.readFileSync(spl[2], `utf-8`));
+                let r = avScan(fs.readFileSync(operatingDirectory + spl[2], `utf-8`));
                 console.log(r);
 
                 if (r.length == 0) console.log(`There were no issues found. This file should be safe to run.`)
@@ -528,16 +540,200 @@ async function nd(u) {
     }
 
     else if (cmd.startsWith(`attrib`)) {
-        let obj = Object.entries(fs.statSync(spl[1]));
+        let obj = Object.entries(fs.statSync(operatingDirectory + spl[1]));
 
         obj.map(x => console.log(x[0] + ": ", x[1]));
+    }
+
+    else if (cmd.startsWith(`date`)) {
+        console.log(new Date().toDateString())
+    }
+
+    else if (cmd.startsWith(`curl`)) {
+        let toFetch = spl[1];
+
+        if (!toFetch.startsWith(`http://`) && !toFetch.startsWith(`https://`)) toFetch = `http://` + toFetch;
+
+        try {
+            await fetch(toFetch)
+            .then(res => res.text())
+            .then(body => console.log(body));
+        } catch(e) {console.log("There was an error.")};
+    }
+
+    else if (cmd.startsWith(`ping`)) {
+        let toFetch = spl[1];
+
+        if (!toFetch.startsWith(`http://`) && !toFetch.startsWith(`https://`)) toFetch = `http://` + toFetch;
+
+        try {
+            let start = Date.now();
+        
+            await fetch(toFetch);
+            
+            let finish = Date.now();
+    
+            console.log(`Time: ${finish - start}ms`);
+        } catch(e) {console.log("There was an error.")};
+
+        
+    }
+
+    else if(cmd.startsWith(`set`)) {
+        let cont = true;
+        if (fs.readdirSync(`./commands`).includes(spl[1] + ".js")) cont = false;
+
+        if (cont == true) vars[spl[1]] = spl[2]
+        else console.log(`Reserved: custom command`);
+    }
+
+    else if (cmd.startsWith(`mkdir`)) {
+        try {fs.mkdirSync(spl[1])}
+        catch(e) {console.log("There was en error.")};
+    }
+
+    else if (cmd.startsWith(`find`)) {
+        try {fs.readFileSync(operatingDirectory + spl[1], `utf-8`).toString().includes(spl.slice(2).join(" ")) ? console.log(true) : console.log(false)}
+        catch(e) {console.log("There was en error.")};
+    }
+
+    else if (cmd.startsWith(`copy`)) {
+        try {fs.writeFileSync(operatingDirectory + spl[2], fs.readFileSync(operatingDirectory + spl[1], `utf-8`).toString())}
+        catch(e) {console.log("There was en error.")};
+    }
+
+    else if (cmd.startsWith(`color`)) {
+        switch(spl[1]) {
+            case "reset":
+                console.log("\x1b[0m");
+            break;
+
+            case "bright":
+                console.log("\x1b[1m");
+            break;
+
+            case "dim":
+                console.log("\1b[2m");
+            break;
+
+            case "underscore":
+                console.log("\1b[4m");
+            break;
+
+            case "blink":
+                console.log("\x1b[5m");
+            break;
+
+            case "reverse":
+                console.log("\x1b[7m");
+            break;
+
+            case "hidden":
+                console.log("\x1b[8m");
+            break;
+
+            case "fgblack":
+                console.log("\x1b[30m");
+            break;
+
+            case "fgred":
+                console.log("\x1b[31m");
+            break;
+
+            case "fggreen":
+                console.log("\x1b[32m");
+            break;
+
+            case "fgyellow":
+                console.log("\x1b[33m");
+            break;
+
+            case "fgblue":
+                console.log("\x1b[34m");
+            break;
+
+            case "fgmagenta":
+                console.log("\x1b[35m");
+            break;
+
+            case "fgcyan":
+                console.log("\x1b[36m");
+            break;
+
+            case "fgwhite":
+                console.log("\x1b[37m");
+            break;
+
+            case "bgblack":
+                console.log("\x1b[40m");
+            break;
+
+            case "bgred":
+                console.log("\x1b[41m");
+            break;
+
+            case "bggreen":
+                console.log("\x1b[42m");
+            break;
+
+            case "bgyellow":
+                console.log("\x1b[43m");
+            break;
+
+            case "bgblue":
+                console.log("\x1b[44m");
+            break;
+
+            case "bgmagenta":
+                console.log("\x1b[45m");
+            break;
+
+            case "bgcyan":
+                console.log("\x1b[46m");
+            break;
+
+            case "bgwhite":
+                console.log("\x1b[46m");
+            break;
+
+            case "help":
+                console.log(["reset", "bright", "dim", "underscore", "blink", "reverse", "hidden", "fgblack", "fgred", "fggreen", "fgyellow",
+                "fgblue", "fgmagenta", "fgcyan", "fgwhite", "bgblack", "bgred", "bggreen", "bgyellow", "bgblue", "bgmagenta", "bgcyan", "bgwhite"   
+            ]);
+            break;
+
+            default:
+                console.log("invalid");
+        }
+    }
+
+    else if (cmd.startsWith(`cd`)) {
+        if (spl[1] == `default`) operatingDirectory = "./";
+        else {
+            if (!spl[1].endsWith(`/`)) spl[1] += "/";
+            if (!fs.readdirSync(operatingDirectory).includes(spl[1].slice(0, -1))) console.log("This directory does not exist!");
+            else {
+                let cont = true;
+
+                try {fs.readdirSync(operatingDirectory + spl[1].slice(0, -1))}
+                catch (e) {console.log("Not a directory!"); cont = false};
+    
+                if (cont == true) {
+                    operatingDirectory += spl[1];
+                }
+            }
+
+        }
     }
 
 
     // custom commands
     else {
-        try {fs.readdirSync(`./commands`)} catch(e) {console.log(`This command does not exist!`)};
-        fs.readdirSync(`./commands`).includes(`${cmd}.js`) ? await eval(`(async () => {${fs.readFileSync(`./commands/${cmd}.js`, `utf-8`)}})();`) : console.log("This command does not exist!");
+        if (vars[spl[0]]) console.log("var: " + vars[spl[0]])
+        else {
+            try {fs.readdirSync(`./commands`)} catch(e) {console.log(`This command does not exist!`)};
+            fs.readdirSync(`./commands`).includes(`${cmd}.js`) ? await eval(`(async () => {${fs.readFileSync(`./commands/${cmd}.js`, `utf-8`)}})();`) : console.log("This command does not exist!");
+        }
     }
 
     // bus
