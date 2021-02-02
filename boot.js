@@ -748,10 +748,11 @@ async function nd(u) {
                     files.map((f, i) => ({ hotkey: i + 1 + '', title: f.name })),
                     { header: 'FTP file to download', border: true },
                 )) {
-                    if (file.hotkey - 1) {
+                    if (/^\.+$/.test(file.title)) paths.pop();
+                    else {
                         if (files[file.hotkey - 1].type !== 2) break;
                         paths.push(file.title);
-                    } else paths.pop();
+                    }
                     files = (paths.length ? [{ name: '..', type: 2 }] : []).concat(await client.list(join(...paths).replace(/\\/g, '/')));
                 }
                 const fromPath = join(...paths, file.title);
@@ -784,7 +785,7 @@ async function nd(u) {
                     files.map((f, i) => ({ hotkey: i + 1 + '', title: f })),
                     { header: 'Local file to upload', border: true },
                 )) {
-                    if (file.hotkey - 1) {
+                    if (/^\.+$/.test(dest.title)) {
                         if (!fs.statSync(join(operatingDirectory, ...paths, files[file.hotkey - 1])).isDirectory()) break;
                         paths.push(file.title);
                     } else paths.pop();
