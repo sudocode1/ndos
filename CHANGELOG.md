@@ -1,3 +1,6 @@
+# Fuego Alpha-6.1
+- Added `ftp`
+
 # Fuego Alpha-6.0
 - Added operating on directories
 - Added `cd`
