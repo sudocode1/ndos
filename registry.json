@@ -1,7 +1,7 @@
 {
     "DATA": {
-        "VERSION": "QWxwaGEtNi4w",
-        "DATE": "MS8zMS8yMDIx",
+        "VERSION": "QWxwaGEtNi4x",
+        "DATE": "Mi8yLzIwMjE=",
         "BUILD": "RnVlZ28=",
         "BLUEPRINT": true,
         "MODIFICATION": {
@@ -81,7 +81,8 @@
         "FIND_SHOWN": [1, "find <file> <text>", "find text in a file"],
         "COPY_SHOWN": [1, "copy <file> <destination>", "copy a file"],
         "COLOR_SHOWN": [1, "color <val/help>", "change the terminal color"],
-        "CD_SHOWN": [1, "cd <dir>", "change operating directory"]
+        "CD_SHOWN": [1, "cd <dir>", "change operating directory"],
+        "FTP_SHOWN": [1, "ftp <url>", "an FTP client"]
     },
 
     "DIR_CMD": {

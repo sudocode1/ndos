@@ -2,11 +2,12 @@
 const fs = require("fs");
 const prompt = require("prompt-sync")();
 const fetch = require("node-fetch");
-const crypto = require("crypto");
+const { Client: FTPClient } = require('basic-ftp');
 const menu = require("console-menu");
 let reg = require(`./registry.json`);
 const { findBestMatch } = require("string-similarity");
 const { execSync } = require("child_process");
+const { join } = require("path");
 let users = JSON.parse(fs.readFileSync(`./users.json`, `utf-8`));
 
 // data
@@ -723,6 +724,93 @@ async function nd(u) {
                 }
             }
 
+        }
+    }
+    
+    else if (cmd.startsWith('ftp')) {
+        const client = new FTPClient();
+        if (!await client.access({
+            host: spl[1],
+            user: prompt('Username: ').trim(),
+            password: prompt('Password: ').trim(),
+        }).catch(() => 0)) console.log('Authorization failed.');
+        else {
+            const task = await menu(
+                [{ hotkey: 'D', title: 'Download files' }, { hotkey: 'U', title: 'Upload files' }],
+                { header: 'FTP Task', border: true },
+            );
+            const ftpFiles = await client.list();
+            if (task.hotkey === 'D') {
+                const paths = [];
+                let files = ftpFiles;
+                let file;
+                while (file = await menu(
+                    files.map((f, i) => ({ hotkey: i + 1 + '', title: f.name })),
+                    { header: 'FTP file to download', border: true },
+                )) {
+                    if (file.hotkey - 1) {
+                        if (files[file.hotkey - 1].type !== 2) break;
+                        paths.push(file.title);
+                    } else paths.pop();
+                    files = (paths.length ? [{ name: '..', type: 2 }] : []).concat(await client.list(join(...paths).replace(/\\/g, '/')));
+                }
+                const fromPath = join(...paths, file.title);
+                console.log('From:', fromPath);
+                const destPaths = [];
+                let destFiles = ['.', ...fs
+                    .readdirSync(operatingDirectory)
+                    .filter(x => fs.statSync(join(operatingDirectory, x)).isDirectory())];
+                let dest;
+                while (destFiles.length && (dest = await menu(
+                    destFiles.map((f, i) => ({ hotkey: i + 1 + '', title: f })),
+                    { header: 'Local file destination', border: true },
+                ))) {
+                    if (dest.title === '.') break;
+                    if (/^\.+$/.test(dest.title)) destPaths.pop();
+                    else destPaths.push(dest.title);
+                    destFiles = (destPaths.length ? ['..'] : []).concat('.', fs.readdirSync(join(operatingDirectory, ...destPaths)).filter(x => fs.statSync(join(operatingDirectory, ...destPaths, x).isDirectory())));
+                }
+                const toPath = join(operatingDirectory, ...destPaths, dest.title, file.title);
+                console.log('To:', toPath);
+                await client
+                    .downloadTo(toPath, fromPath.replace(/\\/g, '/'))
+                    .then(() => console.log('Successfully downloaded', fromPath, 'to', toPath))
+                    .catch(e => console.log('Something went wrong:', e.message));
+            } else {
+                const paths = [];
+                let files = fs.readdirSync(operatingDirectory);
+                let file;
+                while (file = await menu(
+                    files.map((f, i) => ({ hotkey: i + 1 + '', title: f })),
+                    { header: 'Local file to upload', border: true },
+                )) {
+                    if (file.hotkey - 1) {
+                        if (!fs.statSync(join(operatingDirectory, ...paths, files[file.hotkey - 1])).isDirectory()) break;
+                        paths.push(file.title);
+                    } else paths.pop();
+                    files = (paths.length ? ['..'] : []).concat(fs.readdirSync(join(operatingDirectory, ...paths)));
+                }
+                const fromPath = join(operatingDirectory, ...paths, file.title);
+                console.log('From:', fromPath);
+                const destPaths = [];
+                let destFiles = [{ name: '.', type: 2 }, ...ftpFiles.filter(x => x.type === 2)];
+                let dest;
+                while (destFiles.length && (dest = await menu(
+                    destFiles.map((f, i) => ({ hotkey: i + 1 + '', title: f.name })),
+                    { header: 'FTP destination path', border: true },
+                ))) {
+                    if (dest.title === '.') break;
+                    if (/^\.+$/.test(dest.title)) destPaths.pop();
+                    else destPaths.push(dest.title);
+                    destFiles = (destPaths.length ? [{ type: 2, name: '..' }] : []).concat({ type: 2, name: '.' }, (await client.list(join(...destPaths).replace(/\\/g, '/'))).filter(x => x.type === 2));
+                }
+                const toPath = join(...destPaths, prompt('Filename: '));
+                console.log('To:', toPath);
+                await client
+                    .uploadFrom(fromPath, toPath.replace(/\\/g, '/'))
+                    .then(() => console.log('Successfully uploaded', fromPath, 'to', toPath))
+                    .catch(e => console.log('Something went wrong:', e.message));
+            }
         }
     }
 

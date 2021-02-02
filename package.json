@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/sudocode1/ndos#readme",
   "dependencies": {
+    "basic-ftp": "^4.6.3",
     "console-menu": "^0.1.0",
     "fs": "^0.0.1-security",
     "node-fetch": "^2.6.1",
