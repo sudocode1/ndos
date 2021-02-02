@@ -4,11 +4,29 @@ const prompt = require("prompt-sync")();
 const fetch = require("node-fetch");
 const { Client: FTPClient } = require('basic-ftp');
 const menu = require("console-menu");
-let reg = require(`./registry.json`);
 const { findBestMatch } = require("string-similarity");
 const { execSync } = require("child_process");
 const { join } = require("path");
-let users = JSON.parse(fs.readFileSync(`./users.json`, `utf-8`));
+
+// functions
+function criticalError(e = "UNSPECIFIED_ERROR", extra = "NO_EXTRA_INFORMATION") {
+    let total = 0; while(total < 5){console.log("\n"); total++};
+    console.log(`\x1b[31mCRITICAL ERROR: ${e}\nMore info: ${extra}`);
+    total = 0; while(total < 5){console.log("\n"); total++};
+    process.exit();
+};
+
+process.on('unhandledRejection', (reason, promise) => {
+    criticalError("UNHANDLED_NODE_ERROR", reason);
+});
+
+// crit data check
+try {fs.readFileSync(`./registry.json`); fs.readFileSync(`./users.json`)}
+catch(e) {criticalError("CRITICAL_DATA_MISSING", e)};
+
+// crit data
+let reg = require(`./registry.json`);
+let users = require(`./users.json`);
 
 // data
 let build = Buffer.from(reg.DATA["BUILD"], "base64").toString();
@@ -27,6 +45,8 @@ try {fs.readFileSync(`./bus/recentcmds.txt`, `utf-8`)} catch(e) {fs.writeFileSyn
 
 let vars = {};
 let operatingDirectory = "./";
+let fontColor = "\x1b[0m";
+let bgColor = "\x1b[0m";
 
 
 function clear() {
@@ -121,7 +141,7 @@ async function boot() {
         console.log(`\x1b[33mRunning Boot Scripts`)
         console.log("\x1b[0m");
 
-        fs.readdirSync(`./boot`).map(x => eval(fs.readFileSync(`./boot/${x}`, `utf-8`)));
+        fs.readdirSync(`./boot`).map(x => {if (!x.endsWith(`js`)) return; eval(fs.readFileSync(`./boot/${x}`, `utf-8`))});
         console.log();
     }
 
@@ -179,6 +199,7 @@ async function nd(u) {
         if (reg.SHUTDOWN["DISABLE_SHUTDOWN_SCRIPTS"] !== 0) {scripts = false;};
         if (scripts == true) {
             fs.readdirSync(`./shutdown`).map(x => {
+                if (!x.endsWith(`js`)) return;
                 eval(fs.readFileSync(`./shutdown/${x}`, `utf-8`));
             });
 
@@ -235,32 +256,39 @@ async function nd(u) {
         if (!spl[1]) console.log(`Argument unsatisfied.`)
 
         else {
-            let driveExists = true;
-            let driveInvalid = false;
-            try {fs.readFileSync(`./drives/${spl[1]}/compress.txt`); driveExists = true;} 
-            catch(e) {driveExists = false; try {fs.mkdirSync(`./drives/${spl[1]}`);} catch(e) {driveInvalid = true; console.log(e)}};
-
-
-            if (driveExists == true) {
-                console.log(`The drive ${spl[1]} already exists.`);
-            }
+            if (/^[a-z]$/.test(spl[1]) == false) {console.log("Invalid char")}
             else {
-                if (driveInvalid == true) {
-                    console.log("This drive uses invalid characters.")
+                let driveExists = true;
+                let driveInvalid = false;
+                try {fs.readFileSync(`./drives/${spl[1]}/compress.txt`); driveExists = true;} 
+                catch(e) {driveExists = false; try {fs.mkdirSync(`./drives/${spl[1]}`);} catch(e) {driveInvalid = true; console.log(e)}};
+    
+    
+                if (driveExists == true) {
+                    console.log(`The drive ${spl[1]} already exists.`);
                 }
-                else {    
-            fs.writeFileSync(`./drives/${spl[1]}/compress.txt`, ``);
-            console.log(`${spl[1]} has been created & mounted.`);
+                else {
+                    if (driveInvalid == true) {
+                        console.log("This drive uses invalid characters.")
+                    }
+                    else {    
+                fs.writeFileSync(`./drives/${spl[1]}/compress.txt`, ``);
+                console.log(`${spl[1]} has been created & mounted.`);
+            }
         }
-    }
-        };
+            };
+            
+            }
+
     }
 
     else if (cmd.startsWith(`mount`)) {
         let dr;
         let driveList = fs.readdirSync(`./drives`);
+        const dList = driveList.filter(x => x !== '.');
 
-        let menuArr = Array.from({ length: Math.min(driveList.length, 9) }, (_, i) => ({ hotkey: i + '', title: driveList[i][0] }));
+
+        let menuArr = Array.from({ length: Math.min(dList.length, 9) }, (_, i) => ({ hotkey: i + '', title: dList[i][0] }));
         menuArr.push({ separator: true });
         menuArr.push({ hotkey: "?", title: "Other drive" });
 
@@ -269,8 +297,12 @@ async function nd(u) {
             .then(item => {
                 if (item && item.title == "Other drive") {
                     dr = prompt("Drive: ");
+
+                    if (!/^[a-z]$/.test(dr)) criticalError("ILLEGAL_DRIVE_OPERATION");
                 } else if(item) {
                     dr = item.title;
+
+                    if (!/^[a-z]$/.test(dr)) criticalError("ILLEGAL_DRIVE_OPERATION");
                 } else {console.log(dr = "leave")}
             })
         } else {dr = spl[1]};
@@ -302,8 +334,10 @@ async function nd(u) {
     else if (cmd.startsWith(`unmount`)) {
         let dr;
         let driveList = fs.readdirSync(`./drives`);
+        const dList = driveList.filter(x => x !== '.');
 
-        let menuArr = Array.from({ length: Math.min(driveList.length, 9) }, (_, i) => ({ hotkey: i + '', title: driveList[i][0] }));
+
+        let menuArr = Array.from({ length: Math.min(dList.length, 9) }, (_, i) => ({ hotkey: i + '', title: dList[i][0] }));
         menuArr.push({ separator: true });
         menuArr.push({ hotkey: "?", title: "Other drive" });
 
@@ -311,8 +345,11 @@ async function nd(u) {
             await menu(menuArr, {header: "Drive menu", border: true}).then(item => {
                 if (item && item.title == "Other drive") {
                     dr = prompt("Drive: ");
+                    if (!/^[a-z]$/.test(dr)) criticalError("ILLEGAL_DRIVE_OPERATION");
                 } else if(item) {
                     dr = item.title;
+
+                    if (!/^[a-z]$/.test(dr)) criticalError("ILLEGAL_DRIVE_OPERATION");
                 } else {console.log(dr = "leave")}
             });
         } else {dr = spl[1]};
@@ -410,7 +447,8 @@ async function nd(u) {
     }
 
     else if (cmd.startsWith(`eval`)) {
-        eval(spl.slice(1).join(" "));
+        try {eval(spl.slice(1).join(" "));}
+        catch (e) {console.log(e)};
     }
 
     else if (cmd.startsWith(`bus`)) {
@@ -522,28 +560,37 @@ async function nd(u) {
     }
 
     else if (cmd.startsWith(`av`)) {
-        switch (spl[1]) {
-            case "scan":
-                let r = avScan(fs.readFileSync(operatingDirectory + spl[2], `utf-8`));
-                console.log(r);
+        let noError = true;
+        try {fs.readFileSync(operatingDirectory + spl[2], `utf-8`)}
+        catch(e) {noError = false};
 
-                if (r.length == 0) console.log(`There were no issues found. This file should be safe to run.`)
-                else {
-                    console.log(`\x1b[31mWarning!\x1b[37m Issues were found!`);
-                    r.map(x => console.log(x));
-                }
-            break;
-
-            case "info": 
-                reg.DATA.AV["AV_INFO"].map(x => console.log(x));
-            break;
-        }
+        if (noError == true) {
+            switch (spl[1]) {
+                case "scan":
+                    let r = avScan(fs.readFileSync(operatingDirectory + spl[2], `utf-8`));
+    
+                    if (r.length == 0) console.log(`There were no issues found. This file should be safe to run.`)
+                    else {
+                        console.log(`\x1b[31mWarning!\x1b[37m Issues were found!`);
+                        r.map(x => console.log(x));
+                        console.log(fontColor, bgColor);
+                    }
+                break;
+    
+                case "info": 
+                    reg.DATA.AV["AV_INFO"].map(x => console.log(x));
+                break;
+            }
+        } else {console.log("File does not exist!")};
     }
 
     else if (cmd.startsWith(`attrib`)) {
-        let obj = Object.entries(fs.statSync(operatingDirectory + spl[1]));
+        if (!spl[1]) console.log(reg.HELP_CMD.ATTRIB_SHOWN[1])
+        else {
+            let obj = Object.entries(fs.statSync(operatingDirectory + spl[1]));
 
-        obj.map(x => console.log(x[0] + ": ", x[1]));
+            obj.map(x => console.log(x[0] + ": ", x[1]));
+        }
     }
 
     else if (cmd.startsWith(`date`)) {
@@ -551,33 +598,39 @@ async function nd(u) {
     }
 
     else if (cmd.startsWith(`curl`)) {
-        let toFetch = spl[1];
+        if (!spl[1]) console.log(reg.HELP_CMD.CURL_SHOWN[1])
+        else {
+            let toFetch = spl[1];
 
-        if (!toFetch.startsWith(`http://`) && !toFetch.startsWith(`https://`)) toFetch = `http://` + toFetch;
-
-        try {
-            await fetch(toFetch)
-            .then(res => res.text())
-            .then(body => console.log(body));
-        } catch(e) {console.log("There was an error.")};
+            if (!toFetch.startsWith(`http://`) && !toFetch.startsWith(`https://`)) toFetch = `http://` + toFetch;
+    
+            try {
+                await fetch(toFetch)
+                .then(res => res.text())
+                .then(body => console.log(body));
+            } catch(e) {console.log("There was an error.")};
+        }
     }
 
     else if (cmd.startsWith(`ping`)) {
-        let toFetch = spl[1];
+        if (!spl[1]) console.log(reg.HELP_CMD.PING_SHOWN[1])
+        else {
+            let toFetch = spl[1];
 
-        if (!toFetch.startsWith(`http://`) && !toFetch.startsWith(`https://`)) toFetch = `http://` + toFetch;
-
-        try {
-            let start = Date.now();
-        
-            await fetch(toFetch);
-            
-            let finish = Date.now();
+            if (!toFetch.startsWith(`http://`) && !toFetch.startsWith(`https://`)) toFetch = `http://` + toFetch;
     
-            console.log(`Time: ${finish - start}ms`);
-        } catch(e) {console.log("There was an error.")};
-
+            try {
+                let start = Date.now();
+            
+                await fetch(toFetch);
+                
+                let finish = Date.now();
         
+                console.log(`Time: ${finish - start}ms`);
+            } catch(e) {console.log("There was an error.")};
+    
+            
+        }
     }
 
     else if(cmd.startsWith(`set`)) {
@@ -607,94 +660,124 @@ async function nd(u) {
         switch(spl[1]) {
             case "reset":
                 console.log("\x1b[0m");
+                fontColor = "\x1b[0m";
+                bgColor = "\x1b[0m";
             break;
 
             case "bright":
                 console.log("\x1b[1m");
+                fontColor = "\x1b[1m";
+                bgColor = "\x1b[1m";
             break;
 
             case "dim":
-                console.log("\1b[2m");
+                console.log("\x1b[2m");
+                fontColor = "\x1b[2m";
+                bgColor = "\x1b[2m";
             break;
 
             case "underscore":
-                console.log("\1b[4m");
+                console.log("\x1b[4m");
+                fontColor = "\x1b[4m";
+                bgColor = "\x1b[4m";
             break;
 
             case "blink":
                 console.log("\x1b[5m");
+                fontColor = "\x1b[5m";
+                bgColor = "\x1b[5m";
             break;
 
             case "reverse":
                 console.log("\x1b[7m");
+                fontColor = "\x1b[7m";
+                bgColor = "\x1b[7m";
             break;
 
             case "hidden":
                 console.log("\x1b[8m");
+                fontColor = "\x1b[8m";
+                bgColor = "\x1b[8m";
             break;
 
             case "fgblack":
                 console.log("\x1b[30m");
+                fontColor = "\x1b[30m";
             break;
 
             case "fgred":
                 console.log("\x1b[31m");
+                fontColor = "\x1b[31m";
             break;
 
             case "fggreen":
                 console.log("\x1b[32m");
+                fontColor = "\x1b[32m";
             break;
 
             case "fgyellow":
                 console.log("\x1b[33m");
+                fontColor = "\x1b[33m";
             break;
 
             case "fgblue":
                 console.log("\x1b[34m");
+                fontColor = "\x1b[34m";
             break;
 
             case "fgmagenta":
                 console.log("\x1b[35m");
+                fontColor = "\x1b[35m";
             break;
 
             case "fgcyan":
                 console.log("\x1b[36m");
+                fontColor = "\x1b[36m";
             break;
 
             case "fgwhite":
                 console.log("\x1b[37m");
+                fontColor = "\x1b[37m";
             break;
 
             case "bgblack":
                 console.log("\x1b[40m");
+                bgColor = "\x1b[40m";
             break;
 
             case "bgred":
                 console.log("\x1b[41m");
+                bgColor = "\x1b[41m";
             break;
 
             case "bggreen":
                 console.log("\x1b[42m");
+                bgColor = "\x1b[42m";
             break;
 
             case "bgyellow":
                 console.log("\x1b[43m");
+                bgColor = "\x1b[43m";
             break;
 
             case "bgblue":
                 console.log("\x1b[44m");
+                bgColor = "\x1b[44m";
             break;
 
             case "bgmagenta":
                 console.log("\x1b[45m");
+                bgColor = "\x1b[45m";
             break;
 
             case "bgcyan":
                 console.log("\x1b[46m");
+                bgColor = "\x1b[46m";
             break;
 
             case "bgwhite":
-                console.log("\x1b[46m");
+                console.log("\x1b[47m");
+                bgColor = "\x1b[47m";
             break;
 
             case "help":
@@ -709,22 +792,26 @@ async function nd(u) {
     }
 
     else if (cmd.startsWith(`cd`)) {
-        if (spl[1] == `default`) operatingDirectory = "./";
+        if (!spl[1]) {console.log(reg.HELP_CMD.CD_SHOWN[1])}
         else {
-            if (!spl[1].endsWith(`/`)) spl[1] += "/";
-            if (!fs.readdirSync(operatingDirectory).includes(spl[1].slice(0, -1))) console.log("This directory does not exist!");
+            if (spl[1] == `default`) operatingDirectory = "./";
             else {
-                let cont = true;
-
-                try {fs.readdirSync(operatingDirectory + spl[1].slice(0, -1))}
-                catch (e) {console.log("Not a directory!"); cont = false};
+                if (!spl[1].endsWith(`/`)) spl[1] += "/";
+                if (!fs.readdirSync(operatingDirectory).includes(spl[1].slice(0, -1))) console.log("This directory does not exist!");
+                else {
+                    let cont = true;
     
-                if (cont == true) {
-                    operatingDirectory += spl[1];
+                    try {fs.readdirSync(operatingDirectory + spl[1].slice(0, -1))}
+                    catch (e) {console.log("Not a directory!"); cont = false};
+        
+                    if (cont == true) {
+                        operatingDirectory += spl[1];
+                    }
                 }
+    
             }
-
         }
+        
     }
     
     else if (cmd.startsWith('ftp')) {
@@ -785,10 +872,11 @@ async function nd(u) {
                     files.map((f, i) => ({ hotkey: i + 1 + '', title: f })),
                     { header: 'Local file to upload', border: true },
                 )) {
-                    if (/^\.+$/.test(dest.title)) {
-                        if (!fs.statSync(join(operatingDirectory, ...paths, files[file.hotkey - 1])).isDirectory()) break;
-                        paths.push(file.title);
-                    } else paths.pop();
+                    if (/^\.+$/.test(file.title)) paths.pop();
+                    else {
+                                            if (!fs.statSync(join(operatingDirectory, ...paths, files[file.hotkey - 1])).isDirectory()) break;
+                                            paths.push(file.title);
+                                        } 
                     files = (paths.length ? ['..'] : []).concat(fs.readdirSync(join(operatingDirectory, ...paths)));
                 }
                 const fromPath = join(operatingDirectory, ...paths, file.title);

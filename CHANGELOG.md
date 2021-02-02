@@ -1,3 +1,16 @@
+# Fuego Alpha-7.0
+- Fixed FTP no select 1 bug
+- Fixed all reported improper error handling bugs
+- Added critical error handling
+- AV Scan not resetting colors fixed
+- `fontColor` and `bgColor` added
+- Removed array logging in `av scan`
+- Fixed illegal drive operations
+- Forced drive names to be lowercase
+- Fixed macOS illegal drive un/mount bug
+- Fixed non-JS running on boot/shutdown
+
+
 # Fuego Alpha-6.1
 - Added `ftp`
 
