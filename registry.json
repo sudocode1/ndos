@@ -1,18 +1,28 @@
 {
     "DATA": {
-        "VERSION": "a",
-        "DATE": "MS8yNS8yMDIw",
-        "BLUEPRINT": false,
+        "VERSION": "QWxwaGEtNy4w",
+        "DATE": "Mi8yLzIwMjE=",
+        "BUILD": "RnVlZ28=",
+        "BLUEPRINT": true,
         "MODIFICATION": {
             "MODIFIED": false,
             "MODIFIED_BY": "Enter your name here!"
+        },
+        "AV": {
+            "AV_INFO": [
+                "NDOS Protect 1.1",
+                "Basic protection for NDOS, created by the developers"
+            ]
         },
         "GO_ONLINE": true
     },
 
     "BOOT": {
         "DISABLE_BOOT_SCRIPTS": 0,
-        "DISABLE_DEVELOPER_NOTES": 0
+        "DISABLE_DEVELOPER_NOTES": 1,
+        "BOOT_MENU": {
+            "BOOT_MENU_ENABLED": true
+        }
     },
 
     "SHUTDOWN": {
@@ -22,6 +32,20 @@
     "BUS": {
         "DISABLE_CMD_LOGGING": 0,
         "DISABLE_CMD_LOGGING_NOTIFICATION": 1
+    },
+
+    "USERS": {
+        "ROOT_USER_WARNING": 1
+    },
+
+    "START_MENU": {
+        "START_DEFAULT": false,
+        "COMMANDS": [
+            "help",
+            "read",
+            "exit",
+            "dir"
+        ]
     },
 
     "COMMANDS": {},
@@ -41,7 +65,24 @@
         "PACMAN_SHOWN": [1, "pacman <link> <package>", "install an external package"],
         "ECHO_SHOWN": [1, "echo <msg>", "return msg"],
         "EVAL_SHOWN": [1, "eval <js>", "execute javascript"],
-        "BUS_SHOWN": [1, "bus <read/clear/write> [towrite]", "read or edit the BUS"]
+        "BUS_SHOWN": [1, "bus <read/clear/write> [towrite]", "read or edit the BUS"],
+        "REBOOT_SHOWN": [1, "reboot", "reboot NDOS"],
+        "LOGOUT_SHOWN": [1, "logout", "log out"],
+        "NEWUSER_SHOWN": [1, "newuser", "create a new user"],
+        "LOCK_SHOWN": [1, "lock", "lock NDOS"],
+        "START_SHOWN": [1, "start", "switch to the start menu"],
+        "RM_SHOWN": [1, "rm <-f/-d> <file/directory>", "remove a file or directory"],
+        "AV_SHOWN": [1, "av <scan/info> [fileToScan]", "scan a file or find AV info"],
+        "ATTRIB_SHOWN": [1, "attrib <file>", "find file attributes"],
+        "CURL_SHOWN": [1, "curl <url>", "fetch a website"],
+        "PING_SHOWN": [1, "ping <url>", "ping a website"],
+        "SET_SHOWN": [1, "set <var> <val>", "set a temporary variable"],
+        "MKDIR_SHOWN": [1, "mkdir <name>", "create a folder"],
+        "FIND_SHOWN": [1, "find <file> <text>", "find text in a file"],
+        "COPY_SHOWN": [1, "copy <file> <destination>", "copy a file"],
+        "COLOR_SHOWN": [1, "color <val/help>", "change the terminal color"],
+        "CD_SHOWN": [1, "cd <dir>", "change operating directory"],
+        "FTP_SHOWN": [1, "ftp <url>", "an FTP client"]
     },
 
     "DIR_CMD": {

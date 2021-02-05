@@ -4,3 +4,4 @@ commands/
 drives/
 node_modules/
 shutdown/
+package-lock.json
