@@ -1,3 +1,8 @@
+# Fuego Alpha-7.1
+- Execute now runs similar to custom commands
+- Font color resets now fixed
+- AV Info file check bug now fixed
+
 # Fuego Alpha-7.0
 - Fixed FTP no select 1 bug
 - Fixed all reported improper error handling bugs

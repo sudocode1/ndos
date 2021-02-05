@@ -248,7 +248,7 @@ async function nd(u) {
         try { fs.readFileSync(operatingDirectory + toExc); cont = true; } catch (e) { console.log("The file failed to read."); cont = false; };
 
         if (cont === true) {
-            try {eval(fs.readFileSync(operatingDirectory + toExc, `utf-8`))} catch(e) {console.log(e)};
+            try {await eval(`(async () => {${fs.readFileSync(`${operatingDirectory}${toExc}`, `utf-8`)}})();`) } catch(e) {console.log(e)};
         }
     }
 
@@ -561,8 +561,10 @@ async function nd(u) {
 
     else if (cmd.startsWith(`av`)) {
         let noError = true;
-        try {fs.readFileSync(operatingDirectory + spl[2], `utf-8`)}
-        catch(e) {noError = false};
+        if (spl[1] == "scan") {
+            try {fs.readFileSync(operatingDirectory + spl[2], `utf-8`)}
+            catch(e) {noError = false};
+        }
 
         if (noError == true) {
             switch (spl[1]) {
@@ -903,6 +905,10 @@ async function nd(u) {
         }
     }
 
+    else if (cmd.startsWith(`info`)) {
+        console.log(Math.round(process.memoryUsage().heapUsed / 1024 / 1024));
+        console.log(Math.round(process.cpuUsage().system / 8));
+    }
 
     // custom commands
     else {
@@ -921,6 +927,7 @@ async function nd(u) {
         else if (reg.BUS["DISABLE_CMD_LOGGING_NOTIFICATION"] !== 1) {console.log(`BUS_CMD_LOGGING has logged ${cmd} to /bus/recentcmds.txt`)};
     }
 
-    console.log();
+    console.log(fontColor);
+    console.log(bgColor);
     nd(u);
 };
